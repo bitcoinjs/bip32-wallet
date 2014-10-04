@@ -1,0 +1,27 @@
+{
+  "name": "bip32-wallet",
+  "version": "0.0.1",
+  "description": "",
+  "main": "./src/index.js",
+  "scripts": {
+    "coverage": "istanbul cover mocha -- test/*.js",
+    "test": "istanbul test mocha -- --reporter list test/*.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://https://github.com/dcousens/bip32-wallet.git"
+  },
+  "author": "Daniel Cousens",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://https://github.com/dcousens/bip32-wallet/issues"
+  },
+  "homepage": "https://https://github.com/dcousens/bip32-wallet",
+  "devDependencies": {
+    "istanbul": "*",
+    "mocha": "*"
+  },
+  "dependencies": {
+    "bitcoinjs-lib": "^1.1.3"
+  }
+}
