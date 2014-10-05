@@ -15,21 +15,18 @@ function Wallet(seed, network) {
   seed = seed || crypto.randomBytes(32)
   network = network || networks.bitcoin
 
-  // Stored in a closure to make accidental serialization less likely
-  var masterKey = HDNode.fromSeedBuffer(seed, network)
-
   // HD first-level child derivation method should be hardened
   // See https://bitcointalk.org/index.php?topic=405179.msg4415254#msg4415254
-  var accountZero = masterKey.deriveHardened(0)
-  var external = accountZero.derive(0)
-  var internal = accountZero.derive(1)
+  var m = HDNode.fromSeedBuffer(seed, network)
+  var i = m.deriveHardened(0)
+  var external = i.derive(0)
+  var internal = i.derive(1)
 
   this.account = new bip32utils.Account(external.neutered(), internal.neutered())
   this.network = network
   this.unspents = []
 
-  this.getMasterKey = function() { return masterKey }
-  this.getAccountZero = function() { return accountZero }
+  // Getters in a closure to avoid accidental serialization
   this.getExternalAccount = function() { return external }
   this.getInternalAccount = function() { return internal }
 }
