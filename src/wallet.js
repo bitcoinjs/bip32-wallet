@@ -3,7 +3,6 @@ var crypto = require('crypto')
 
 var bitcoinjs = require('bitcoinjs-lib')
 var bip32utils = require('bip32-utils')
-var bufferutils = bitcoinjs.bufferutils
 var networks = bitcoinjs.networks
 
 var Address = bitcoinjs.Address
@@ -133,43 +132,25 @@ Wallet.prototype.getUnspentOutputs = function(minConf) {
 
   return this.unspents.filter(function(unspent) {
     return unspent.confirmations >= minConf
-
-  }).map(function(unspent) {
-    return {
-      address: unspent.address,
-      confirmations: unspent.confirmations,
-      index: unspent.index,
-      txId: unspent.txId,
-      value: unspent.value
-    }
   })
 }
 
 Wallet.prototype.setUnspentOutputs = function(unspents) {
-  this.unspents = unspents.map(function(unspent) {
+  unspents.forEach(function(unspent) {
     var txId = unspent.txId
     var index = unspent.index
 
     assert.equal(typeof txId, 'string', 'Expected txId, got ' + txId)
     assert.equal(txId.length, 64, 'Expected valid txId, got ' + txId)
-    assert.doesNotThrow(function() { Address.fromBase58Check(unspent.address) }, 'Expected Base58 Address, got ' + unspent.address)
+    assert.doesNotThrow(function() {
+      Address.fromBase58Check(unspent.address)
+    }, 'Expected Base58 Address, got ' + unspent.address)
     assert(isFinite(index), 'Expected number index, got ' + index)
     assert.equal(typeof unspent.value, 'number', 'Expected number value, got ' + unspent.value)
     assert.equal(typeof unspent.confirmations, 'number', 'Expected number confirmations, got ' + unspent.confirmations)
+  })
 
-    var txHash = bufferutils.reverse(new Buffer(txId, 'hex'))
-
-    unspent = {
-      address: unspent.address,
-      confirmations: unspent.confirmations || 0,
-      index: index,
-      txHash: txHash,
-      txId: txId,
-      value: unspent.value
-    }
-
-    return unspent
-  }, this)
+  this.unspents = unspents
 }
 
 Wallet.prototype.signWith = function(tx, addresses) {
