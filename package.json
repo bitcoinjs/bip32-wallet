@@ -19,7 +19,8 @@
   "homepage": "https://https://github.com/dcousens/bip32-wallet",
   "devDependencies": {
     "istanbul": "*",
-    "mocha": "*"
+    "mocha": "*",
+    "sinon": "^1.10.3"
   },
   "dependencies": {
     "bitcoinjs-lib": "^1.1.3"
