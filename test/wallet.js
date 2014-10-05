@@ -190,11 +190,13 @@ describe('Wallet', function() {
   describe('createTransaction', function() {
     var wallet
     var address1, address2
-    var to, value
+    var output
 
     beforeEach(function() {
-      to = 'mt7MyTVVEWnbwpF5hBn6fgnJcv95Syk2ue'
-      value = 500000
+      output = {
+        address: 'mt7MyTVVEWnbwpF5hBn6fgnJcv95Syk2ue',
+        value: 500000
+      }
 
       address1 = "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa"
       address2 = "n2fiWrHqD6GM5GiEqkbWAc6aaZQp3ba93X"
@@ -233,15 +235,14 @@ describe('Wallet', function() {
     describe('transaction fee', function() {
       it('allows fee to be specified', function() {
         var fee = 30000
-        var tx = wallet.createTransaction(to, value, { fixedFee: fee })
+        var tx = wallet.createTransaction([output], { fixedFee: fee })
 
         assert.equal(getFee(wallet, tx), fee)
       })
 
       it('allows fee to be set to zero', function() {
-        value = 510000
         var fee = 0
-        var tx = wallet.createTransaction(to, value, { fixedFee: fee })
+        var tx = wallet.createTransaction([output], { fixedFee: fee })
 
         assert.equal(getFee(wallet, tx), fee)
       })
@@ -259,8 +260,10 @@ describe('Wallet', function() {
         wallet.setUnspentOutputs([utxo])
         wallet.generateAddress()
 
-        value = 200000
-        var tx = wallet.createTransaction(utxo.address, value)
+        var tx = wallet.createTransaction([{
+          address: utxo.address,
+          value: 200000
+        }])
 
         assert.equal(getFee(wallet, tx), 100000)
       })
@@ -285,7 +288,7 @@ describe('Wallet', function() {
 
     describe('choosing utxo', function() {
       it('takes fees into account', function() {
-        var tx = wallet.createTransaction(to, value)
+        var tx = wallet.createTransaction([output])
 
         assert.equal(tx.ins.length, 1)
         assert.deepEqual(tx.ins[0].hash, fakeTxHash(3))
@@ -317,7 +320,7 @@ describe('Wallet', function() {
           }
         ])
 
-        var tx = wallet.createTransaction(to, value, {
+        var tx = wallet.createTransaction([output], {
           fixedFee: 1000
         })
 
@@ -336,7 +339,10 @@ describe('Wallet', function() {
         var toValue = fromValue / 2
         var fee = 1e3
 
-        var tx = wallet.createTransaction(to, toValue, {
+        var tx = wallet.createTransaction([{
+          address: output.address,
+          value: toValue
+        }], {
           fixedFee: fee,
           changeAddress: changeAddress
         })
@@ -345,7 +351,7 @@ describe('Wallet', function() {
         var outAddress0 = Address.fromOutputScript(tx.outs[0].script, networks.testnet)
         var outAddress1 = Address.fromOutputScript(tx.outs[1].script, networks.testnet)
 
-        assert.equal(outAddress0.toString(), to)
+        assert.equal(outAddress0.toString(), output.address)
         assert.equal(tx.outs[0].value, toValue)
 
         assert.equal(outAddress1.toString(), changeAddress)
@@ -355,21 +361,21 @@ describe('Wallet', function() {
 
     describe('transaction outputs', function() {
       it('includes the specified address and amount', function() {
-        var tx = wallet.createTransaction(to, value)
+        var tx = wallet.createTransaction([output])
 
         assert.equal(tx.outs.length, 1)
         var out = tx.outs[0]
         var outAddress = Address.fromOutputScript(out.script, networks.testnet)
 
-        assert.equal(outAddress.toString(), to)
-        assert.equal(out.value, value)
+        assert.equal(outAddress.toString(), output.address)
+        assert.equal(out.value, output.value)
       })
 
       describe('change', function() {
         it('uses the last change address if there is any', function() {
           var fee = 0
           wallet.generateAddress()
-          var tx = wallet.createTransaction(to, value, { fixedFee: fee })
+          var tx = wallet.createTransaction([output], { fixedFee: fee })
 
           assert.equal(tx.outs.length, 2)
           var out = tx.outs[1]
@@ -380,10 +386,16 @@ describe('Wallet', function() {
         })
 
         it('skips change if it is not above dust threshold', function() {
-          var tx1 = wallet.createTransaction(to, value - 546)
+          var tx1 = wallet.createTransaction([{
+            address: output.address,
+            value: output.value - 546
+          }])
           assert.equal(tx1.outs.length, 1)
 
-          var tx2 = wallet.createTransaction(to, value - 547)
+          var tx2 = wallet.createTransaction([{
+            address: output.address,
+            value: output.value - 547
+          }])
           assert.equal(tx2.outs.length, 2)
         })
       })
@@ -392,7 +404,7 @@ describe('Wallet', function() {
     describe('signing', function() {
       it('signs the inputs with respective keys', function() {
         var fee = 30000
-        var tx = wallet.createTransaction(to, value, { fixedFee: fee })
+        var tx = wallet.createTransaction([output], { fixedFee: fee })
 
         assert.equal(tx.getId(), 'a0935ae000b1d7c67d729c64104ae184431a2669e8c080a8b9613a2ff5b5821a')
       })
@@ -400,20 +412,26 @@ describe('Wallet', function() {
 
     describe('when value is below dust threshold', function() {
       it('throws an error', function() {
-        var value = 546
+        var outputs = [{
+          address: 'mt7MyTVVEWnbwpF5hBn6fgnJcv95Syk2ue',
+          value: 546
+        }]
 
         assert.throws(function() {
-          wallet.createTransaction(to, value)
+          wallet.createTransaction(outputs)
         }, /546 must be above dust threshold \(546 Satoshis\)/)
       })
     })
 
     describe('when there is not enough money', function() {
       it('throws an error', function() {
-        var value = 1400001
+        var outputs = [{
+          address: 'mt7MyTVVEWnbwpF5hBn6fgnJcv95Syk2ue',
+          value: 1400001
+        }]
 
         assert.throws(function() {
-          wallet.createTransaction(to, value)
+          wallet.createTransaction(outputs)
         }, /Not enough funds \(incl. fee\): 1410000 < 1410001/)
       })
     })

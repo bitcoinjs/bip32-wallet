@@ -41,10 +41,8 @@ function estimatePaddedFee(tx, network) {
   return network.estimateFee(tmpTx)
 }
 
-Wallet.prototype.createTransaction = function(to, value, options) {
+Wallet.prototype.createTransaction = function(outputs, options) {
   options = options || {}
-
-  assert(value > this.network.dustThreshold, value + ' must be above dust threshold (' + this.network.dustThreshold + ' Satoshis)')
 
   var changeAddress = options.changeAddress
   var fixedFee = options.fixedFee
@@ -57,23 +55,38 @@ Wallet.prototype.createTransaction = function(to, value, options) {
     return o2.value - o1.value
   })
 
+  var txb = new TransactionBuilder()
+  var targetValue = 0
+
+  outputs.forEach(function(output) {
+    if (output.value <= this.network.dustThreshold) {
+      throw new Error(output.value + ' must be above dust threshold (' + this.network.dustThreshold + ' Satoshis)')
+    }
+
+    targetValue += output.value
+    txb.addOutput(output.address, output.value)
+  }, this)
+
   var accum = 0
   var addresses = []
-  var subTotal = value
-
-  var txb = new TransactionBuilder()
-  txb.addOutput(to, value)
+  var subTotal = targetValue
 
   for (var i = 0; i < unspents.length; ++i) {
     var unspent = unspents[i]
     addresses.push(unspent.address)
 
-    txb.addInput(unspent.txHash, unspent.index)
+    txb.addInput(unspent.txId, unspent.index)
 
-    var fee = fixedFee === undefined ? estimatePaddedFee(txb.buildIncomplete(), this.network) : fixedFee
+    var fee
+    if (fixedFee === undefined) {
+      fee = estimatePaddedFee(txb.buildIncomplete(), this.network)
+
+    } else {
+      fee = fixedFee
+    }
 
     accum += unspent.value
-    subTotal = value + fee
+    subTotal = targetValue + fee
 
     if (accum >= subTotal) {
       var change = accum - subTotal
@@ -86,7 +99,9 @@ Wallet.prototype.createTransaction = function(to, value, options) {
     }
   }
 
-  assert(accum >= subTotal, 'Not enough funds (incl. fee): ' + accum + ' < ' + subTotal)
+  if (accum < subTotal) {
+    throw new Error('Not enough funds (incl. fee): ' + accum + ' < ' + subTotal)
+  }
 
   return this.signWith(txb, addresses).build()
 }
