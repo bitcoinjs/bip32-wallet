@@ -2,6 +2,7 @@ var assert = require('assert')
 var crypto = require('crypto')
 
 var bitcoinjs = require('bitcoinjs-lib')
+var bip32utils = require('bip32-utils')
 var bufferutils = bitcoinjs.bufferutils
 var networks = bitcoinjs.networks
 
@@ -20,18 +21,17 @@ function Wallet(seed, network) {
   // HD first-level child derivation method should be hardened
   // See https://bitcointalk.org/index.php?topic=405179.msg4415254#msg4415254
   var accountZero = masterKey.deriveHardened(0)
-  var externalAccount = accountZero.derive(0)
-  var internalAccount = accountZero.derive(1)
+  var external = accountZero.derive(0)
+  var internal = accountZero.derive(1)
 
-  this.addresses = []
-  this.changeAddresses = []
+  this.account = new bip32utils.Account(external.neutered(), internal.neutered())
   this.network = network
   this.unspents = []
 
   this.getMasterKey = function() { return masterKey }
   this.getAccountZero = function() { return accountZero }
-  this.getExternalAccount = function() { return externalAccount }
-  this.getInternalAccount = function() { return internalAccount }
+  this.getExternalAccount = function() { return external }
+  this.getInternalAccount = function() { return internal }
 }
 
 function estimatePaddedFee(tx, network) {
@@ -92,29 +92,13 @@ Wallet.prototype.createTransaction = function(to, value, options) {
 }
 
 Wallet.prototype.generateAddress = function() {
-  var k = this.addresses.length
-  var address = this.getExternalAccount().derive(k).getAddress()
-
-  this.addresses.push(address.toString())
+  this.account.nextAddress()
 
   return this.getAddress()
 }
 
-Wallet.prototype.generateChangeAddress = function() {
-  var k = this.changeAddresses.length
-  var address = this.getInternalAccount().derive(k).getAddress()
-
-  this.changeAddresses.push(address.toString())
-
-  return this.getChangeAddress()
-}
-
 Wallet.prototype.getAddress = function() {
-  if (this.addresses.length === 0) {
-    this.generateAddress()
-  }
-
-  return this.addresses[this.addresses.length - 1]
+  return this.account.getAddress()
 }
 
 Wallet.prototype.getBalance = function(minConf) {
@@ -129,33 +113,7 @@ Wallet.prototype.getBalance = function(minConf) {
 }
 
 Wallet.prototype.getChangeAddress = function() {
-  if (this.changeAddresses.length === 0) {
-    this.generateChangeAddress()
-  }
-
-  return this.changeAddresses[this.changeAddresses.length - 1]
-}
-
-Wallet.prototype.getInternalPrivateKey = function(index) {
-  return this.getInternalAccount().derive(index).privKey
-}
-
-Wallet.prototype.getPrivateKey = function(index) {
-  return this.getExternalAccount().derive(index).privKey
-}
-
-Wallet.prototype.getPrivateKeyForAddress = function(address) {
-  var index
-
-  if ((index = this.addresses.indexOf(address)) > -1) {
-    return this.getPrivateKey(index)
-  }
-
-  if ((index = this.changeAddresses.indexOf(address)) > -1) {
-    return this.getInternalPrivateKey(index)
-  }
-
-  assert(false, 'Unknown address. Make sure the address is from the keychain and has been generated')
+  return this.account.getChangeAddress()
 }
 
 Wallet.prototype.getUnspentOutputs = function(minConf) {
@@ -203,11 +161,14 @@ Wallet.prototype.setUnspentOutputs = function(unspents) {
 }
 
 Wallet.prototype.signWith = function(tx, addresses) {
-  addresses.forEach(function(address, i) {
-    var privKey = this.getPrivateKeyForAddress(address)
+  var external = this.getExternalAccount()
+  var internal = this.getInternalAccount()
+  var nodes = this.account.getNodes(addresses, external, internal)
+  var keys = nodes.map(function(node) { return node.privKey })
 
-    tx.sign(i, privKey)
-  }, this)
+  keys.forEach(function(key, i) {
+    tx.sign(i, key)
+  })
 
   return tx
 }

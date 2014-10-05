@@ -3,12 +3,10 @@ var assert = require('assert')
 var bitcoinjs = require('bitcoinjs-lib')
 var bufferutils = bitcoinjs.bufferutils
 var networks = bitcoinjs.networks
-var sinon = require('sinon')
 
 var Address = bitcoinjs.Address
 var crypto = bitcoinjs.crypto
 var HDNode = bitcoinjs.HDNode
-var TransactionBuilder = bitcoinjs.TransactionBuilder
 
 var Wallet = require('../src/wallet')
 
@@ -84,83 +82,9 @@ describe('Wallet', function() {
         "n2fiWrHqD6GM5GiEqkbWAc6aaZQp3ba93X"
       ]
 
-      assert.equal(wallet.generateAddress(), expectedAddresses[0])
+      assert.equal(wallet.getAddress(), expectedAddresses[0])
       assert.equal(wallet.generateAddress(), expectedAddresses[1])
-      assert.deepEqual(wallet.addresses, expectedAddresses)
-    })
-  })
-
-  describe('generateChangeAddress', function() {
-    var wallet
-    beforeEach(function() {
-      wallet = new Wallet(seed)
-    })
-
-    it('generates change addresses', function() {
-      var wallet = new Wallet(seed, networks.testnet)
-      var expectedAddresses = ["mnXiDR4MKsFxcKJEZjx4353oXvo55iuptn"]
-
-      assert.equal(wallet.generateChangeAddress(), expectedAddresses[0])
-      assert.deepEqual(wallet.changeAddresses, expectedAddresses)
-    })
-  })
-
-  describe('getPrivateKey', function() {
-    var wallet
-    beforeEach(function() {
-      wallet = new Wallet(seed)
-    })
-
-    it('returns the private key at the given index of external account', function() {
-      var wallet = new Wallet(seed, networks.testnet)
-
-      assertEqual(wallet.getPrivateKey(0), wallet.getExternalAccount().derive(0).privKey)
-      assertEqual(wallet.getPrivateKey(1), wallet.getExternalAccount().derive(1).privKey)
-    })
-  })
-
-  describe('getInternalPrivateKey', function() {
-    var wallet
-    beforeEach(function() {
-      wallet = new Wallet(seed)
-    })
-
-    it('returns the private key at the given index of internal account', function() {
-      var wallet = new Wallet(seed, networks.testnet)
-
-      assertEqual(wallet.getInternalPrivateKey(0), wallet.getInternalAccount().derive(0).privKey)
-      assertEqual(wallet.getInternalPrivateKey(1), wallet.getInternalAccount().derive(1).privKey)
-    })
-  })
-
-  describe('getPrivateKeyForAddress', function() {
-    var wallet
-    beforeEach(function() {
-      wallet = new Wallet(seed)
-    })
-
-    it('returns the private key for the given address', function() {
-      var wallet = new Wallet(seed, networks.testnet)
-      wallet.generateChangeAddress()
-      wallet.generateAddress()
-      wallet.generateAddress()
-
-      assertEqual(
-        wallet.getPrivateKeyForAddress("n2fiWrHqD6GM5GiEqkbWAc6aaZQp3ba93X"),
-        wallet.getExternalAccount().derive(1).privKey
-      )
-      assertEqual(
-        wallet.getPrivateKeyForAddress("mnXiDR4MKsFxcKJEZjx4353oXvo55iuptn"),
-        wallet.getInternalAccount().derive(0).privKey
-      )
-    })
-
-    it('raises an error when address is not found', function() {
-      var wallet = new Wallet(seed, networks.testnet)
-
-      assert.throws(function() {
-        wallet.getPrivateKeyForAddress("n2fiWrHqD6GM5GiEqkbWAc6aaZQp3ba93X")
-      }, /Unknown address. Make sure the address is from the keychain and has been generated/)
+      assert.deepEqual(wallet.account.external.addresses, expectedAddresses)
     })
   })
 
@@ -444,29 +368,14 @@ describe('Wallet', function() {
       describe('change', function() {
         it('uses the last change address if there is any', function() {
           var fee = 0
-          wallet.generateChangeAddress()
-          wallet.generateChangeAddress()
+          wallet.generateAddress()
           var tx = wallet.createTransaction(to, value, { fixedFee: fee })
 
           assert.equal(tx.outs.length, 2)
           var out = tx.outs[1]
           var outAddress = Address.fromOutputScript(out.script, networks.testnet)
 
-          assert.equal(outAddress.toString(), wallet.changeAddresses[1])
-          assert.equal(out.value, 10000)
-        })
-
-        it('generates a change address if there is not any', function() {
-          var fee = 0
-          assert.equal(wallet.changeAddresses.length, 0)
-
-          var tx = wallet.createTransaction(to, value, { fixedFee: fee })
-
-          assert.equal(wallet.changeAddresses.length, 1)
-          var out = tx.outs[1]
-          var outAddress = Address.fromOutputScript(out.script, networks.testnet)
-
-          assert.equal(outAddress.toString(), wallet.changeAddresses[0])
+          assert.equal(outAddress.toString(), wallet.account.internal.addresses[3])
           assert.equal(out.value, 10000)
         })
 
@@ -481,24 +390,11 @@ describe('Wallet', function() {
     })
 
     describe('signing', function() {
-      afterEach(function() {
-        TransactionBuilder.prototype.sign.restore()
-      })
-
       it('signs the inputs with respective keys', function() {
         var fee = 30000
-        sinon.spy(TransactionBuilder.prototype, "sign")
+        var tx = wallet.createTransaction(to, value, { fixedFee: fee })
 
-        wallet.createTransaction(to, value, { fixedFee: fee })
-
-        var priv1 = wallet.getPrivateKeyForAddress(address1)
-        var priv2 = wallet.getPrivateKeyForAddress(address2)
-
-        // FIXME: boo (required) side effects
-        priv1.pub.Q.affineX, priv2.pub.Q.affineX
-
-        assert(TransactionBuilder.prototype.sign.calledWith(0, priv2))
-        assert(TransactionBuilder.prototype.sign.calledWith(1, priv1))
+        assert.equal(tx.getId(), 'a0935ae000b1d7c67d729c64104ae184431a2669e8c080a8b9613a2ff5b5821a')
       })
     })
 
@@ -522,10 +418,6 @@ describe('Wallet', function() {
       })
     })
   })
-
-  function assertEqual(obj1, obj2){
-    assert.equal(obj1.toString(), obj2.toString())
-  }
 
   // quick and dirty: does not deal with functions on object
   function cloneObject(obj){
