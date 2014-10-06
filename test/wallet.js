@@ -5,19 +5,15 @@ var bufferutils = bitcoinjs.bufferutils
 var networks = bitcoinjs.networks
 
 var Address = bitcoinjs.Address
-var crypto = bitcoinjs.crypto
-var HDNode = bitcoinjs.HDNode
 
 var Wallet = require('../src/wallet')
 
-function fakeTxHash(i) {
-  var hash = new Buffer(32)
-  hash.fill(i)
-  return hash
+function fakeHash(i) {
+  return bitcoinjs.crypto.sha256('' + i)
 }
 
-function fakeTxId(i) {
-  var hash = fakeTxHash(i)
+function fakeHashHex(i) {
+  var hash = fakeHash(i)
   Array.prototype.reverse.call(hash)
   return hash.toString('hex')
 }
@@ -25,7 +21,7 @@ function fakeTxId(i) {
 describe('Wallet', function() {
   var seed
   beforeEach(function() {
-    seed = crypto.sha256("don't use a string seed like this in real life")
+    seed = bitcoinjs.crypto.sha256("don't use a string seed like this in real life")
   })
 
   describe('constructor', function() {
@@ -88,12 +84,21 @@ describe('Wallet', function() {
   })
 
   describe('getAddresses', function() {
-    it('retrieves all known addresses', function() {
-      var wallet = new Wallet(seed, networks.testnet)
+    var wallet
+
+    beforeEach(function() {
+      wallet = new Wallet(seed, networks.testnet)
+    })
+
+    it('returns all known addresses', function() {
       wallet.generateAddress()
 
-      assert.equal(wallet.getAddresses().length, 4)
-      assert.deepEqual(wallet.getAddresses(), wallet.account.addresses)
+      assert.deepEqual(wallet.getAddresses(), [
+        'n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa',
+        'n2fiWrHqD6GM5GiEqkbWAc6aaZQp3ba93X',
+        'mnXiDR4MKsFxcKJEZjx4353oXvo55iuptn',
+        'mtQrg4dcAVhDDzbyXawmRbpzRTRiUgfAE5'
+      ])
     })
   })
 
@@ -103,10 +108,11 @@ describe('Wallet', function() {
 
     beforeEach(function() {
       utxo = {
-        "address" : "1AZpKpcfCzKDUeTFBQUL4MokQai3m3HMXv",
-        "confirmations": 1,
-        "index": 0,
-        "txId": fakeTxId(6),
+        "txId": fakeHashHex(6),
+        "blockHash": fakeHashHex(),
+        "blockHeight": 298368,
+        "address" : 'n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa',
+        "vout": 0,
         "value": 20000
       }
     })
@@ -128,7 +134,7 @@ describe('Wallet', function() {
     describe('getBalance', function() {
       beforeEach(function() {
         var utxo1 = cloneObject(utxo)
-        utxo1.hash = fakeTxId(5)
+        utxo1.hash = fakeHashHex(5)
 
         wallet = new Wallet(seed, networks.bitcoin)
         wallet.setUnspentOutputs([utxo, utxo1])
@@ -139,22 +145,17 @@ describe('Wallet', function() {
       })
     })
 
-    describe('getUnspentOutputs', function() {
+    describe('getConfirmedBalance', function() {
       beforeEach(function() {
+        var utxo1 = cloneObject(utxo)
+        utxo1.hash = fakeHashHex(5)
+
         wallet = new Wallet(seed, networks.bitcoin)
-        wallet.setUnspentOutputs([utxo])
+        wallet.setUnspentOutputs([utxo, utxo1])
       })
 
-      it('parses wallet unspents to the expected format', function() {
-        var outputs = wallet.getUnspentOutputs()
-        var output = outputs[0]
-
-        assert.equal(utxo.address, output.address)
-        assert.equal(utxo.index, output.index)
-        assert.equal(utxo.value, output.value)
-
-        assert.equal(utxo.txId, output.txId)
-        assert.equal(utxo.confirmations, output.confirmations)
+      it('sums over utxo values', function() {
+        assert.equal(wallet.getBalance(), 40000)
       })
     })
   })
@@ -165,8 +166,8 @@ describe('Wallet', function() {
 
     beforeEach(function() {
       utxo = {
-        txId: fakeTxId(0),
-        index: 0,
+        txId: fakeHashHex(0),
+        vout: 0,
         address: '115qa7iPZqn6as57hxLL8E9VUnhmGQxKWi',
         value: 500000,
         confirmations: 1
@@ -184,7 +185,7 @@ describe('Wallet', function() {
     })
 
     describe('required fields', function() {
-      ['index', 'address', 'txId', 'value'].forEach(function(field){
+      ['vout', 'address', 'txId', 'value'].forEach(function(field){
         it("throws an error when " + field + " is missing", function() {
           delete utxo[field]
 
@@ -213,22 +214,22 @@ describe('Wallet', function() {
       // set up 3 utxos
       var utxos = [
         {
-          "txId": fakeTxId(1),
-          "index": 0,
+          "txId": fakeHashHex(1),
+          "vout": 0,
           "address": address1,
           "value": 400000, // not enough for value
           "confirmations": 1
         },
         {
-          "txId": fakeTxId(2),
-          "index": 1,
+          "txId": fakeHashHex(2),
+          "vout": 1,
           "address": address1,
           "value": 500000, // enough for only value
           "confirmations": 1
         },
         {
-          "txId": fakeTxId(3),
-          "index": 0,
+          "txId": fakeHashHex(3),
+          "vout": 0,
           "address" : address2,
           "value": 510000, // enough for value and fee
           "confirmations": 1
@@ -258,8 +259,8 @@ describe('Wallet', function() {
 
       it('does not overestimate fees when network has dustSoftThreshold', function() {
         var utxo = {
-          txId: fakeTxId(0),
-          index: 0,
+          txId: fakeHashHex(0),
+          vout: 0,
           address: "LeyySKbQrRRwodKEj1W4a8y3YQupPLw5os",
           value: 500000,
           confirmations: 1
@@ -280,13 +281,13 @@ describe('Wallet', function() {
       function getFee(wallet, tx) {
         var valueMap = {}
         wallet.unspents.forEach(function(unspent) {
-          valueMap[unspent.txId + ':' + unspent.index] = unspent.value
+          valueMap[unspent.txId + ':' + unspent.vout] = unspent.value
         })
 
         var inputValue = tx.ins.reduce(function(accum, input) {
           var txId = bufferutils.reverse(input.hash).toString('hex')
 
-          return accum + valueMap[txId + ':' + input.index]
+          return accum + valueMap[txId + ':' + input.vout]
         }, 0)
 
         return tx.outs.reduce(function(accum, output) {
@@ -300,29 +301,29 @@ describe('Wallet', function() {
         var tx = wallet.createTransaction([output])
 
         assert.equal(tx.ins.length, 1)
-        assert.deepEqual(tx.ins[0].hash, fakeTxHash(3))
-        assert.equal(tx.ins[0].index, 0)
+        assert.deepEqual(tx.ins[0].hash, fakeHash(3))
+        assert.equal(tx.ins[0].vout, 0)
       })
 
       it('uses only confirmed outputs', function() {
         wallet.setUnspentOutputs([
           {
-            "txId": fakeTxId(1),
-            "index": 0,
+            "txId": fakeHashHex(1),
+            "vout": 0,
             "address" : address2,
             "value": 531000, // perfect amount w/ fees, but unconfirmed
             "confirmations": 0
           },
           {
-            "txId": fakeTxId(3),
-            "index": 0,
+            "txId": fakeHashHex(3),
+            "vout": 0,
             "address": address1,
             "value": 300000,
             "confirmations": 1
           },
           {
-            "txId": fakeTxId(3),
-            "index": 1,
+            "txId": fakeHashHex(3),
+            "vout": 1,
             "address": address2,
             "value": 300000,
             "confirmations": 1
@@ -334,8 +335,8 @@ describe('Wallet', function() {
         })
 
         assert.equal(tx.ins.length, 2)
-        assert.deepEqual(tx.ins[0].hash, fakeTxHash(3))
-        assert.deepEqual(tx.ins[1].hash, fakeTxHash(3))
+        assert.deepEqual(tx.ins[0].hash, fakeHash(3))
+        assert.deepEqual(tx.ins[1].hash, fakeHash(3))
         assert.equal(tx.ins[0].index, 0)
         assert.equal(tx.ins[1].index, 1)
       })

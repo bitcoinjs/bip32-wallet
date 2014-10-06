@@ -1,5 +1,4 @@
 var assert = require('assert')
-var crypto = require('crypto')
 
 var bitcoinjs = require('bitcoinjs-lib')
 var bip32utils = require('bip32-utils')
@@ -11,7 +10,6 @@ var TransactionBuilder = bitcoinjs.TransactionBuilder
 var Script = bitcoinjs.Script
 
 function Wallet(seed, network) {
-  seed = seed || crypto.randomBytes(32)
   network = network || networks.bitcoin
 
   // HD first-level child derivation method should be hardened
@@ -71,7 +69,7 @@ Wallet.prototype.createTransaction = function(outputs, options) {
     var unspent = unspents[i]
     addresses.push(unspent.address)
 
-    txb.addInput(unspent.txId, unspent.index)
+    txb.addInput(unspent.txId, unspent.vout)
 
     var fee
     if (fixedFee === undefined) {
@@ -116,13 +114,8 @@ Wallet.prototype.getAddresses = function() {
   return this.account.addresses
 }
 
-Wallet.prototype.getBalance = function(minConf) {
-  minConf = minConf || 0
-
-  return this.unspents.filter(function(unspent) {
-    return unspent.confirmations >= minConf
-
-  }).reduce(function(accum, unspent) {
+Wallet.prototype.getBalance = function() {
+  return this.unspents.reduce(function(accum, unspent) {
     return accum + unspent.value
   }, 0)
 }
@@ -131,27 +124,26 @@ Wallet.prototype.getChangeAddress = function() {
   return this.account.getChangeAddress()
 }
 
-Wallet.prototype.getUnspentOutputs = function(minConf) {
-  minConf = minConf || 0
-
+Wallet.prototype.getConfirmedBalance = function() {
   return this.unspents.filter(function(unspent) {
-    return unspent.confirmations >= minConf
-  })
+    return !!unspent.blockHash
+
+  }).reduce(function(accum, unspent) {
+    return accum + unspent.value
+  }, 0)
 }
 
 Wallet.prototype.setUnspentOutputs = function(unspents) {
   unspents.forEach(function(unspent) {
     var txId = unspent.txId
-    var index = unspent.index
 
     assert.equal(typeof txId, 'string', 'Expected txId, got ' + txId)
     assert.equal(txId.length, 64, 'Expected valid txId, got ' + txId)
     assert.doesNotThrow(function() {
       Address.fromBase58Check(unspent.address)
     }, 'Expected Base58 Address, got ' + unspent.address)
-    assert(isFinite(index), 'Expected number index, got ' + index)
-    assert.equal(typeof unspent.value, 'number', 'Expected number value, got ' + unspent.value)
-    assert.equal(typeof unspent.confirmations, 'number', 'Expected number confirmations, got ' + unspent.confirmations)
+    assert(isFinite(unspent.vout), 'Expected number vout, got ' + unspent.vout)
+    assert(isFinite(unspent.value), 'Expected number value, got ' + unspent.value)
   })
 
   this.unspents = unspents
