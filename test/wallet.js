@@ -117,20 +117,6 @@ describe('Wallet', function() {
       }
     })
 
-    describe('on construction', function() {
-      beforeEach(function() {
-        wallet = new Wallet(seed, networks.bitcoin)
-        wallet.setUnspentOutputs([utxo])
-      })
-
-      it('matches the expected behaviour', function() {
-        var output = wallet.unspents[0]
-
-        assert.equal(output.address, utxo.address)
-        assert.equal(output.value, utxo.value)
-      })
-    })
-
     describe('getBalance', function() {
       beforeEach(function() {
         var utxo1 = cloneObject(utxo)
