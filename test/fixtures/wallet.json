@@ -1,0 +1,40 @@
+{
+  "valid": [
+    {
+      "seed": "043c72ff615427ee4daf77b05206abd27de3b7655736539b88ea4e533bbd492d",
+      "network": "testnet",
+      "addresses": [
+        "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa",
+        "n2fiWrHqD6GM5GiEqkbWAc6aaZQp3ba93X",
+        "mnXiDR4MKsFxcKJEZjx4353oXvo55iuptn",
+        "mtQrg4dcAVhDDzbyXawmRbpzRTRiUgfAE5"
+      ],
+      "unspents": [
+        {
+          "txId": "839691f0e681fbfc5f7a3812b616027d6fd74f17540b33cdb78d6e7711c0f6e7",
+          "blockHash": "e957fb273ad72967b4914edd39c2dbc2796c696d6c7852d9386fc8ff66ebec5f",
+          "blockHeight": 298368,
+          "address": "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa",
+          "vout": 0,
+          "value": 20000
+        },
+        {
+          "txId": "51241b0849daa625769f186ac5226be81765720145bbfb468e8a2ce49b690279",
+          "blockHash": "e957fb273ad72967b4914edd39c2dbc2796c696d6c7852d9386fc8ff66ebec5f",
+          "blockHeight": 298368,
+          "address": "n2fiWrHqD6GM5GiEqkbWAc6aaZQp3ba93X",
+          "vout": 1,
+          "value": 30000
+        },
+        {
+          "txId": "a364fbde6ff00ed996b6668bacf60d0a00ca0a31bbdf94127721d2cd3242622c",
+          "blockHash": null,
+          "blockHeight": null,
+          "address": "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa",
+          "vout": 0,
+          "value": 6000
+        }
+      ]
+    }
+  ]
+}
