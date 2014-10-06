@@ -65,7 +65,7 @@ describe('Wallet', function() {
 
   describe.skip('getAddress', function() {})
   describe('getAddresses', function() {
-    it.only('returns all known addresses', function() {
+    it('returns all known addresses', function() {
       for (var i = 2; i < f.addresses.length; i += 2) {
         wallet.generateAddress()
       }
@@ -80,7 +80,7 @@ describe('Wallet', function() {
     })
 
     it('sums all unspents', function() {
-      assert.equal(wallet.getBalance(), 56000) // FIXME: move balance to fixtures
+      assert.equal(wallet.getBalance(), f.balance)
     })
   })
 
@@ -92,7 +92,7 @@ describe('Wallet', function() {
     })
 
     it('sums confirmed unspents', function() {
-      assert.equal(wallet.getConfirmedBalance(), 50000) // FIXME: move balance to fixtures
+      assert.equal(wallet.getConfirmedBalance(), f.confirmedBalance)
     })
   })
 

@@ -9,6 +9,8 @@
         "mnXiDR4MKsFxcKJEZjx4353oXvo55iuptn",
         "mtQrg4dcAVhDDzbyXawmRbpzRTRiUgfAE5"
       ],
+      "balance": 56000,
+      "confirmedBalance": 50000,
       "unspents": [
         {
           "txId": "839691f0e681fbfc5f7a3812b616027d6fd74f17540b33cdb78d6e7711c0f6e7",
