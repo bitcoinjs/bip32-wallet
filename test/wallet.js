@@ -50,6 +50,41 @@ describe('Wallet', function() {
     })
   })
 
+  describe('createTransaction', function() {
+    var unspents, wallet
+
+    beforeEach(function() {
+      unspents = [
+        {
+          "txId": fakeHashHex(6),
+          "blockHash": fakeHashHex(0),
+          "blockHeight": 298368,
+          "address" : 'n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa',
+          "vout": 0,
+          "value": 20000
+        },
+        {
+          "txId": fakeHashHex(7),
+          "blockHash": fakeHashHex(0),
+          "blockHeight": 298368,
+          "address" : 'n2fiWrHqD6GM5GiEqkbWAc6aaZQp3ba93X',
+          "vout": 1,
+          "value": 30000
+        },
+        {
+          "txId": fakeHashHex(8),
+          "blockHash": null,
+          "blockHeight": null,
+          "address" : 'n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa',
+          "vout": 0,
+          "value": 6000
+        }
+      ]
+
+      wallet = new Wallet(seed, networks.testnet)
+    })
+  })
+
   describe('generateAddress', function() {
     var wallet
 
@@ -80,6 +115,7 @@ describe('Wallet', function() {
     })
   })
 
+  describe.skip('getAddress', function() {})
   describe('getAddresses', function() {
     var wallet
 
@@ -138,6 +174,8 @@ describe('Wallet', function() {
       assert.equal(wallet.getBalance(), 56000)
     })
   })
+
+  describe.skip('getChangeAddress', function() {})
 
   describe('getConfirmedBalance', function() {
     var unspents, wallet
@@ -222,38 +260,5 @@ describe('Wallet', function() {
     // TODO: test validation
   })
 
-  describe('createTransaction', function() {
-    var unspents, wallet
-
-    beforeEach(function() {
-      unspents = [
-        {
-          "txId": fakeHashHex(6),
-          "blockHash": fakeHashHex(0),
-          "blockHeight": 298368,
-          "address" : 'n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa',
-          "vout": 0,
-          "value": 20000
-        },
-        {
-          "txId": fakeHashHex(7),
-          "blockHash": fakeHashHex(0),
-          "blockHeight": 298368,
-          "address" : 'n2fiWrHqD6GM5GiEqkbWAc6aaZQp3ba93X',
-          "vout": 1,
-          "value": 30000
-        },
-        {
-          "txId": fakeHashHex(8),
-          "blockHash": null,
-          "blockHeight": null,
-          "address" : 'n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa',
-          "vout": 0,
-          "value": 6000
-        }
-      ]
-
-      wallet = new Wallet(seed, networks.testnet)
-    })
-  })
+  describe.skip('signWith', function() {})
 })
