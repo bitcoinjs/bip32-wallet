@@ -24,8 +24,8 @@ function Wallet(seed, network) {
   this.unspents = []
 
   // Getters in a closure to avoid accidental serialization
-  this.getExternalAccount = function() { return external }
-  this.getInternalAccount = function() { return internal }
+  this.getExternal = function() { return external }
+  this.getInternal = function() { return internal }
 }
 
 function estimatePaddedFee(tx, network) {
@@ -136,9 +136,16 @@ Wallet.prototype.getConfirmedBalance = function() {
 Wallet.prototype.setUnspentOutputs = function(unspents) {
   unspents.forEach(function(unspent) {
     var txId = unspent.txId
+    var blockHash = unspent.blockHash
 
     assert.equal(typeof txId, 'string', 'Expected txId, got ' + txId)
     assert.equal(txId.length, 64, 'Expected valid txId, got ' + txId)
+
+    if (blockHash !== null) {
+      assert.equal(typeof blockHash, 'string', 'Expected blockHash, got ' + blockHash)
+      assert.equal(blockHash.length, 64, 'Expected valid blockHash, got ' + blockHash)
+    }
+
     assert.doesNotThrow(function() {
       Address.fromBase58Check(unspent.address)
     }, 'Expected Base58 Address, got ' + unspent.address)
