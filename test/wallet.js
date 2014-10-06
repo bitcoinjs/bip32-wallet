@@ -35,61 +35,60 @@ describe('Wallet', function() {
     })
 
     it('defaults to Bitcoin network', function() {
-      assert.equal(wallet.getMasterKey().network, networks.bitcoin)
+      assert.equal(wallet.network, networks.bitcoin)
     })
 
-    it("generates m/0' as the main account", function() {
-      var mainAccount = wallet.getAccountZero()
-      assert.equal(mainAccount.index, 0 + HDNode.HIGHEST_BIT)
-      assert.equal(mainAccount.depth, 1)
+    it('uses the network if specified', function() {
+      wallet = new Wallet(seed, networks.testnet)
+
+      assert.equal(wallet.getMasterKey().network, networks.testnet)
     })
 
     it("generates m/0'/0 as the external account", function() {
-      var account = wallet.getExternalAccount()
-      assert.equal(account.index, 0)
-      assert.equal(account.depth, 2)
+      var external = wallet.getExternalAccount()
+      assert.equal(external.index, 0)
+      assert.equal(external.depth, 2)
     })
 
     it("generates m/0'/1 as the internal account", function() {
-      var account = wallet.getInternalAccount()
-      assert.equal(account.index, 1)
-      assert.equal(account.depth, 2)
-    })
-
-    describe('when seed is not specified', function() {
-      it('generates a seed', function() {
-        var wallet = new Wallet()
-        assert(wallet.getMasterKey())
-      })
-    })
-
-    describe('constructor options', function() {
-      beforeEach(function() {
-        wallet = new Wallet(seed, networks.testnet)
-      })
-
-      it('uses the network if specified', function() {
-        assert.equal(wallet.getMasterKey().network, networks.testnet)
-      })
+      var internal = wallet.getInternalinternal()
+      assert.equal(internal.index, 1)
+      assert.equal(internal.depth, 2)
     })
   })
 
   describe('generateAddress', function() {
-    it('generate receiving addresses', function() {
-      var wallet = new Wallet(seed, networks.testnet)
-      var expected = [
-        "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa",
-        "n2fiWrHqD6GM5GiEqkbWAc6aaZQp3ba93X"
-      ]
+    var wallet
 
-      assert.equal(wallet.getAddress(), expected[0])
-      assert.equal(wallet.generateAddress(), expected[1])
-      assert.deepEqual(wallet.account.external.addresses, expected)
+    beforeEach(function() {
+      wallet = new Wallet(seed, networks.testnet)
+    })
+
+    it('generates a new external (and internal) Address', function() {
+      assert.deepEqual(wallet.getAddresses(), [
+        "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa",
+        "mnXiDR4MKsFxcKJEZjx4353oXvo55iuptn"
+      ])
+
+      wallet.generateAddress()
+
+      assert.deepEqual(wallet.getAddresses(), [
+        'n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa',
+        'n2fiWrHqD6GM5GiEqkbWAc6aaZQp3ba93X',
+        'mnXiDR4MKsFxcKJEZjx4353oXvo55iuptn',
+        'mtQrg4dcAVhDDzbyXawmRbpzRTRiUgfAE5'
+      ])
+    })
+
+    it('returns the latest external Address', function() {
+      var result = wallet.generateAddress()
+
+      assert.deepEqual(result, wallet.getAddress())
     })
   })
 
   describe('getAddresses', function() {
-    it.only('retrieves all known addresses', function() {
+    it('retrieves all known addresses', function() {
       var wallet = new Wallet(seed, networks.testnet)
       wallet.generateAddress()
 
