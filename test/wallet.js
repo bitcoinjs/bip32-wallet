@@ -37,7 +37,7 @@ describe('Wallet', function() {
     it('uses the network if specified', function() {
       wallet = new Wallet(seed, networks.testnet)
 
-      assert.equal(wallet.getMasterKey().network, networks.testnet)
+      assert.equal(wallet.network, networks.testnet)
     })
 
     it("generates m/0'/0 as the external account", function() {
