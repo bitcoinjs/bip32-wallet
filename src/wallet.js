@@ -112,6 +112,10 @@ Wallet.prototype.getAddress = function() {
   return this.account.getAddress()
 }
 
+Wallet.prototype.getAddresses = function() {
+  return this.account.addresses
+}
+
 Wallet.prototype.getBalance = function(minConf) {
   minConf = minConf || 0
 

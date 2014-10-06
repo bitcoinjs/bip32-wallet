@@ -77,14 +77,24 @@ describe('Wallet', function() {
   describe('generateAddress', function() {
     it('generate receiving addresses', function() {
       var wallet = new Wallet(seed, networks.testnet)
-      var expectedAddresses = [
+      var expected = [
         "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa",
         "n2fiWrHqD6GM5GiEqkbWAc6aaZQp3ba93X"
       ]
 
-      assert.equal(wallet.getAddress(), expectedAddresses[0])
-      assert.equal(wallet.generateAddress(), expectedAddresses[1])
-      assert.deepEqual(wallet.account.external.addresses, expectedAddresses)
+      assert.equal(wallet.getAddress(), expected[0])
+      assert.equal(wallet.generateAddress(), expected[1])
+      assert.deepEqual(wallet.account.external.addresses, expected)
+    })
+  })
+
+  describe('getAddresses', function() {
+    it.only('retrieves all known addresses', function() {
+      var wallet = new Wallet(seed, networks.testnet)
+      wallet.generateAddress()
+
+      assert.equal(wallet.getAddresses().length, 4)
+      assert.deepEqual(wallet.getAddresses(), wallet.account.addresses)
     })
   })
 
