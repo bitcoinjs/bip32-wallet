@@ -38,90 +38,102 @@ describe('Wallet', function() {
   })
 
   fixtures.valid.forEach(function(f, i) {
-    if (i === 0) return
-    var wallet
+    describe('Test fixture ' + i, function() {
+      var wallet
 
-    beforeEach(function() {
-      var seed = new Buffer(f.seed, 'hex')
-      var network = bitcoinjs.networks[f.network]
+      beforeEach(function() {
+        var seed = new Buffer(f.seed, 'hex')
+        var network = bitcoinjs.networks[f.network]
 
-      wallet = new Wallet(seed, network)
-    })
-
-    describe.skip('createTransaction', function() {
-
-    })
-
-    describe('generateAddress', function() {
-      it('generates a new external (and internal) Address', function() {
-        assert.deepEqual(wallet.getAddresses(), [
-          f.addresses[0],
-          f.addresses[f.addresses.length / 2]
-        ])
-
-        wallet.generateAddress()
-
-        assert.deepEqual(wallet.getAddresses(), f.addresses.slice(0, 4))
+        wallet = new Wallet(seed, network)
       })
 
-      it('returns the latest external Address', function() {
-        var result = wallet.generateAddress()
+      describe.skip('createTransaction', function() {
 
-        assert.deepEqual(result, wallet.getAddress())
       })
-    })
 
-    describe.skip('getAddress', function() {})
-    describe('getAddresses', function() {
-      it('returns all known addresses', function() {
-        for (var i = 2; i < f.addresses.length; i += 2) {
+      describe('generateAddress', function() {
+        it('generates a new external (and internal) Address', function() {
+          assert.deepEqual(wallet.getAddresses(), [
+            f.addresses[0],
+            f.addresses[f.addresses.length / 2]
+          ])
+
           wallet.generateAddress()
-        }
 
-        assert.deepEqual(wallet.getAddresses(), f.addresses)
+          assert.deepEqual(wallet.getAddresses(), f.addresses.slice(0, 4))
+        })
+
+        it('returns the latest external Address', function() {
+          var result = wallet.generateAddress()
+
+          assert.deepEqual(result, wallet.getAddress())
+        })
       })
+
+      describe('getAddress', function() {
+        it('returns the latest internal Address', function() {
+          var expected = wallet.account.external.get()
+
+          assert.deepEqual(wallet.getAddress(), expected)
+        })
+      })
+
+      describe('getAddresses', function() {
+        it('returns all known addresses', function() {
+          for (var i = 2; i < f.addresses.length; i += 2) {
+            wallet.generateAddress()
+          }
+
+          assert.deepEqual(wallet.getAddresses(), f.addresses)
+        })
+      })
+
+  //it('skips change if it is not above dust threshold', function() {
+  //it('signs the inputs with respective keys', function() {
+  //it('throws when value is below dust threshold', function() {
+  //it('throws there is not enough money', function() {
+  //it('throws there is not enough money (incl. fee)', function() {
+
+      describe('getBalance', function() {
+        beforeEach(function() {
+          wallet.setUnspentOutputs(f.unspents)
+        })
+
+        it('sums all unspents', function() {
+          assert.equal(wallet.getBalance(), f.balance)
+        })
+      })
+
+      describe('getChangeAddress', function() {
+        it('returns the latest internal Address', function() {
+          var expected = wallet.account.internal.get()
+
+          assert.deepEqual(wallet.getChangeAddress(), expected)
+        })
+      })
+
+      describe('getConfirmedBalance', function() {
+        beforeEach(function() {
+          wallet.setUnspentOutputs(f.unspents)
+        })
+
+        it('sums confirmed unspents', function() {
+          assert.equal(wallet.getConfirmedBalance(), f.confirmedBalance)
+        })
+      })
+
+      describe('setUnspentOutputs', function() {
+        it('sets wallet.unspents correctly', function() {
+          wallet.setUnspentOutputs(f.unspents)
+
+          assert.equal(wallet.unspents, f.unspents)
+        })
+
+        // TODO: test validation
+      })
+
+      describe.skip('signWith', function() {})
     })
-
-//it('skips change if it is not above dust threshold', function() {
-//it('signs the inputs with respective keys', function() {
-//it('throws when value is below dust threshold', function() {
-//it('throws there is not enough money', function() {
-//it('throws there is not enough money (incl. fee)', function() {
-
-    describe('getBalance', function() {
-      beforeEach(function() {
-        wallet.setUnspentOutputs(f.unspents)
-      })
-
-      it('sums all unspents', function() {
-        assert.equal(wallet.getBalance(), f.balance)
-      })
-    })
-
-    describe.skip('getChangeAddress', function() {
-
-    })
-
-    describe('getConfirmedBalance', function() {
-      beforeEach(function() {
-        wallet.setUnspentOutputs(f.unspents)
-      })
-
-      it('sums confirmed unspents', function() {
-        assert.equal(wallet.getConfirmedBalance(), f.confirmedBalance)
-      })
-    })
-
-    describe('setUnspentOutputs', function() {
-      it('sets wallet.unspents correctly', function() {
-        wallet.setUnspentOutputs(f.unspents)
-
-        assert.equal(wallet.unspents, f.unspents)
-      })
-
-      // TODO: test validation
-    })
-
-    describe.skip('signWith', function() {})
   })
 })
