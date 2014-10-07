@@ -152,6 +152,24 @@
             "change": 10000,
             "fee": 10000
           }
+        },
+        {
+          "description": "ignores change if it is not above dust threshold",
+          "outputs": [
+            {
+              "address": "n2PEoV6Abxnrpzoqqq1TJT5kw8G2dMPpBd",
+              "value": 189600
+            }
+          ],
+          "options": {},
+          "expected": {
+            "txId": "d1aa1e20a0b46311af79b4bf902a3fcbf17fd1ea409bcc5bcee24299d3d44928",
+            "inputs": [
+              0, 1
+            ],
+            "change": 0,
+            "fee": 10400
+          }
         }
       ],
       "unspents": [

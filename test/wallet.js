@@ -48,6 +48,11 @@ describe('Wallet', function() {
         wallet = new Wallet(seed, network)
       })
 
+      // TODO
+      //it('signs the inputs with respective keys', function() {
+      //it('throws when value is below dust threshold', function() {
+      //it('throws there is not enough money', function() {
+      //it('throws there is not enough money (incl. fee)', function() {
       describe('createTransaction', function() {
         var unspentsMap
 
@@ -156,12 +161,6 @@ describe('Wallet', function() {
           assert.deepEqual(wallet.getAddresses(), f.addresses)
         })
       })
-
-  //it('skips change if it is not above dust threshold', function() {
-  //it('signs the inputs with respective keys', function() {
-  //it('throws when value is below dust threshold', function() {
-  //it('throws there is not enough money', function() {
-  //it('throws there is not enough money (incl. fee)', function() {
 
       describe('getBalance', function() {
         beforeEach(function() {
