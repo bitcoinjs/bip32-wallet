@@ -49,7 +49,45 @@ describe('Wallet', function() {
       })
 
       describe.skip('createTransaction', function() {
+        var unspentsMap
 
+        beforeEach(function() {
+          wallet.setUnspentOutputs(f.unspents)
+
+          unspentsMap = {}
+          f.unspents.forEach(function(unspent) {
+            unspentsMap[unspent.txId + ':' + unspent.vout] = unspent
+          })
+        })
+
+        f.transactions.forEach(function(t) {
+          it(t.description, function() {
+            var tx = wallet.createTransaction(t.outputs, t.options)
+
+            var inputTotal = 0
+            tx.ins.forEach(function(txIn) {
+              var txId = bitcoinjs.bufferutils.reverse(txIn.txHash).toString('hex')
+              var unspent = unspentsMap[txId + ':' + txIn.index]
+              inputTotal += unspent.value
+            })
+
+            var outputTotal = tx.outs.reduce(function(a, x) { return a + x.value })
+            var fee = inputTotal - outputTotal
+
+            assert.equal(tx.getId(), t.expected.txId)
+            assert.equal(tx.ins.length, t.expected.inputs.length)//FIXME
+            assert.equal(tx.outs.length, t.expected.outputs)
+            assert.equal(fee, t.expected.fee)
+
+            t.outputs.forEach(function(output) {
+              assert(tx.outs.some(function(txOut) {
+                var address = bitcoinjs.Address.fromOutputScript(txOut.script).toString()
+
+                return output.address === address
+              }))
+            })
+          })
+        })
       })
 
       describe('generateAddress', function() {

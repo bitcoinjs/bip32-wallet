@@ -184,7 +184,6 @@
       "transactions": [
         {
           "description": "does not overestimate fees when network has dustSoftThreshold",
-          "network": "litecoin",
           "outputs": [
             {
               "address": "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa",
