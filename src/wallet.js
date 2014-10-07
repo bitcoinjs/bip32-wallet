@@ -156,8 +156,8 @@ Wallet.prototype.setUnspentOutputs = function(unspents) {
 }
 
 Wallet.prototype.signWith = function(tx, addresses) {
-  var external = this.getExternalAccount()
-  var internal = this.getInternalAccount()
+  var external = this.getExternal()
+  var internal = this.getInternal()
   var nodes = this.account.getNodes(addresses, external, internal)
   var keys = nodes.map(function(node) { return node.privKey })
 
