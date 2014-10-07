@@ -9,8 +9,132 @@
         "mnXiDR4MKsFxcKJEZjx4353oXvo55iuptn",
         "mtQrg4dcAVhDDzbyXawmRbpzRTRiUgfAE5"
       ],
-      "balance": 56000,
-      "confirmedBalance": 50000,
+      "balance": 560000,
+      "confirmedBalance": 200000,
+      "transactions": [
+        {
+          "description": "standard transaction (no change)",
+          "outputs": [
+            {
+              "address": "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa",
+              "value": 165000
+            }
+          ],
+          "options": {},
+          "expected": {
+            "txId": "",
+            "inputs": [1],
+            "outputs": 1,
+            "fee": 10000
+          }
+        },
+        {
+          "description": "standard transaction",
+          "outputs": [
+            {
+              "address": "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa",
+              "value": 190000
+            }
+          ],
+          "options": {},
+          "expected": {
+            "txId": "",
+            "inputs": [0, 1],
+            "outputs": 2,
+            "fee": 10000
+          }
+        },
+        {
+          "description": "many outputs transaction",
+          "outputs": [
+            {
+              "address": "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa",
+              "value": 30000
+            },
+            {
+              "address": "n2fiWrHqD6GM5GiEqkbWAc6aaZQp3ba93X",
+              "value": 40000
+            }
+          ],
+          "options": {},
+          "expected": {
+            "txId": "",
+            "inputs": [1],
+            "outputs": 2,
+            "fee": 10000
+          }
+        },
+        {
+          "description": "uses only confirmed outputs",
+          "outputs": [
+            {
+              "address": "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa",
+              "value": 19000
+            }
+          ],
+          "options": {
+            "fixedFee": 0
+          },
+          "expected": {
+            "txId": "",
+            "fee": 0
+          }
+        },
+        {
+          "description": "allows for a custom fee",
+          "outputs": [
+            {
+              "address": "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa",
+              "value": 180000
+            }
+          ],
+          "options": {
+            "fixedFee": 20000
+          },
+          "expected": {
+            "txId": "",
+            "inputs": [0, 1],
+            "outputs": 1,
+            "fee": 20000
+          }
+        },
+        {
+          "description": "allows a fee of zero",
+          "outputs": [
+            {
+              "address": "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa",
+              "value": 180000
+            }
+          ],
+          "options": {
+            "fixedFee": 0
+          },
+          "expected": {
+            "txId": "",
+            "inputs": [0, 1],
+            "outputs": 2,
+            "fee": 0
+          }
+        },
+        {
+          "description": "allows a custom change address",
+          "outputs": [
+            {
+              "address": "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa",
+              "value": 180000
+            }
+          ],
+          "options": {
+            "changeAddress": "mtQrg4dcAVhDDzbyXawmRbpzRTRiUgfAE5"
+          },
+          "expected": {
+            "txId": "",
+            "inputs": [0, 1],
+            "outputs": 2,
+            "fee": 0
+          }
+        }
+      ],
       "unspents": [
         {
           "txId": "839691f0e681fbfc5f7a3812b616027d6fd74f17540b33cdb78d6e7711c0f6e7",
@@ -18,7 +142,7 @@
           "blockHeight": 298368,
           "address": "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa",
           "vout": 0,
-          "value": 20000
+          "value": 25000
         },
         {
           "txId": "51241b0849daa625769f186ac5226be81765720145bbfb468e8a2ce49b690279",
@@ -26,7 +150,7 @@
           "blockHeight": 298368,
           "address": "n2fiWrHqD6GM5GiEqkbWAc6aaZQp3ba93X",
           "vout": 1,
-          "value": 30000
+          "value": 175000
         },
         {
           "txId": "a364fbde6ff00ed996b6668bacf60d0a00ca0a31bbdf94127721d2cd3242622c",
@@ -34,7 +158,56 @@
           "blockHeight": null,
           "address": "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa",
           "vout": 0,
-          "value": 6000
+          "value": 300000
+        },
+        {
+          "txId": "7de1555df0c2700329e815b93b32c571c3ea54dc967b89e81ab73b9972b72d1d",
+          "blockHash": null,
+          "blockHeight": null,
+          "address": "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa",
+          "vout": 0,
+          "value": 60000
+        }
+      ]
+    },
+    {
+      "seed": "043c72ff615427ee4daf77b05206abd27de3b7655736539b88ea4e533bbd492d",
+      "network": "litecoin",
+      "addresses": [
+        "LeyySKbQrRRwodKEj1W4a8y3YQupPLw5os",
+        "LgNiV1WgUj59YxvnJKcRchx1vnBPGD7SgB",
+        "LSEiBaHCbW4m61Wn2JxyVAuEt9ZeKANb5s",
+        "LY7reDrTS8W1hgpWz9xgshgRmgCHiCb4Rq"
+      ],
+      "balance": 400000,
+      "confirmedBalance": 400000,
+      "transactions": [
+        {
+          "description": "does not overestimate fees when network has dustSoftThreshold",
+          "network": "litecoin",
+          "outputs": [
+            {
+              "address": "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa",
+              "value": 200000
+            }
+          ],
+          "options": {},
+          "expected": {
+            "txId": "",
+            "inputs": [0, 1],
+            "outputs": 2,
+            "fee": 100000
+          }
+        }
+      ],
+      "unspents": [
+        {
+          "txId": "839691f0e681fbfc5f7a3812b616027d6fd74f17540b33cdb78d6e7711c0f6e7",
+          "blockHash": "e957fb273ad72967b4914edd39c2dbc2796c696d6c7852d9386fc8ff66ebec5f",
+          "blockHeight": 298368,
+          "address": "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa",
+          "vout": 0,
+          "value": 400000
         }
       ]
     }
