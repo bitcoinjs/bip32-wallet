@@ -48,10 +48,14 @@ describe('Wallet', function() {
         wallet = new Wallet(seed, network)
       })
 
-      describe.skip('createTransaction', function() {
+      describe('createTransaction', function() {
         var unspentsMap
 
         beforeEach(function() {
+          for (var i = 2; i < f.addresses.length; i += 2) {
+            wallet.generateAddress()
+          }
+
           wallet.setUnspentOutputs(f.unspents)
 
           unspentsMap = {}
@@ -66,26 +70,52 @@ describe('Wallet', function() {
 
             var inputTotal = 0
             tx.ins.forEach(function(txIn) {
-              var txId = bitcoinjs.bufferutils.reverse(txIn.txHash).toString('hex')
+              var txId = bitcoinjs.bufferutils.reverse(txIn.hash).toString('hex')
               var unspent = unspentsMap[txId + ':' + txIn.index]
               inputTotal += unspent.value
             })
 
-            var outputTotal = tx.outs.reduce(function(a, x) { return a + x.value })
+            var expectedTotal = t.outputs.reduce(function(a, x) { return a + x.value }, 0)
+            var outputTotal = tx.outs.reduce(function(a, x) { return a + x.value }, 0)
             var fee = inputTotal - outputTotal
+            var change = outputTotal - expectedTotal
 
-            assert.equal(tx.getId(), t.expected.txId)
-            assert.equal(tx.ins.length, t.expected.inputs.length)//FIXME
-            assert.equal(tx.outs.length, t.expected.outputs)
+            assert.equal(change, t.expected.change)
             assert.equal(fee, t.expected.fee)
 
-            t.outputs.forEach(function(output) {
-              assert(tx.outs.some(function(txOut) {
-                var address = bitcoinjs.Address.fromOutputScript(txOut.script).toString()
+            // if change is expected, make sure outputs length matches
+            assert.equal(tx.outs.length, t.outputs.length + !!t.expected.change)
 
-                return output.address === address
+            // ensure only expected inputs are found
+            t.expected.inputs.forEach(function(index) {
+              var unspent = f.unspents[index]
+
+              assert(tx.ins.some(function(txIn) {
+                var txId = bitcoinjs.bufferutils.reverse(txIn.hash).toString('hex')
+
+                return unspent.txId === txId && unspent.vout === txIn.index
               }))
             })
+
+            // ensure only expected outputs are found
+            t.outputs.forEach(function(output) {
+              assert(tx.outs.some(function(txOut) {
+                var address = bitcoinjs.Address.fromOutputScript(txOut.script, wallet.network).toString()
+
+                return output.address === address && output.value === txOut.value
+              }))
+            })
+
+            if (t.options.changeAddress) {
+              assert(tx.outs.some(function(txOut) {
+                var address = bitcoinjs.Address.fromOutputScript(txOut.script, wallet.network).toString()
+
+                return t.options.changeAddress === address
+              }))
+            }
+
+            // catch-all verification
+            assert.equal(tx.getId(), t.expected.txId)
           })
         })
       })

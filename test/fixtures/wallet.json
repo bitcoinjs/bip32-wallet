@@ -16,15 +16,17 @@
           "description": "standard transaction (no change)",
           "outputs": [
             {
-              "address": "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa",
+              "address": "n2PEoV6Abxnrpzoqqq1TJT5kw8G2dMPpBd",
               "value": 165000
             }
           ],
           "options": {},
           "expected": {
-            "txId": "",
-            "inputs": [1],
-            "outputs": 1,
+            "txId": "f1f48f18f7821f70eef40c4bcc7bb0ba7d9704469684c85ab05ca43abe1d1f2a",
+            "inputs": [
+              1
+            ],
+            "change": 0,
             "fee": 10000
           }
         },
@@ -32,15 +34,18 @@
           "description": "standard transaction",
           "outputs": [
             {
-              "address": "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa",
-              "value": 190000
+              "address": "n2PEoV6Abxnrpzoqqq1TJT5kw8G2dMPpBd",
+              "value": 177000
             }
           ],
           "options": {},
           "expected": {
-            "txId": "",
-            "inputs": [0, 1],
-            "outputs": 2,
+            "txId": "2cae462629324342cb03d2147754fe7b05b519b08806c48f0a52e40441a8c8e8",
+            "inputs": [
+              0,
+              1
+            ],
+            "change": 13000,
             "fee": 10000
           }
         },
@@ -48,19 +53,21 @@
           "description": "many outputs transaction",
           "outputs": [
             {
-              "address": "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa",
+              "address": "n2PEoV6Abxnrpzoqqq1TJT5kw8G2dMPpBd",
               "value": 30000
             },
             {
-              "address": "n2fiWrHqD6GM5GiEqkbWAc6aaZQp3ba93X",
+              "address": "mtoKs9V381UAhUia3d7Vb9GNak8Qvmcsme",
               "value": 40000
             }
           ],
           "options": {},
           "expected": {
-            "txId": "",
-            "inputs": [1],
-            "outputs": 2,
+            "txId": "0f81b1619e83fb7260734c758212a7e30dbbadb3359fbba0fb9376ddf0eb482b",
+            "inputs": [
+              1
+            ],
+            "change": 95000,
             "fee": 10000
           }
         },
@@ -68,23 +75,26 @@
           "description": "uses only confirmed outputs",
           "outputs": [
             {
-              "address": "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa",
-              "value": 19000
+              "address": "n2PEoV6Abxnrpzoqqq1TJT5kw8G2dMPpBd",
+              "value": 190000
             }
           ],
-          "options": {
-            "fixedFee": 0
-          },
+          "options": {},
           "expected": {
-            "txId": "",
-            "fee": 0
+            "txId": "ac2b1e8ea344cd943e18584b84703814a4fe8fdb81cd17fe37043644e54eedf9",
+            "inputs": [
+              0,
+              1
+            ],
+            "change": 0,
+            "fee": 10000
           }
         },
         {
           "description": "allows for a custom fee",
           "outputs": [
             {
-              "address": "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa",
+              "address": "n2PEoV6Abxnrpzoqqq1TJT5kw8G2dMPpBd",
               "value": 180000
             }
           ],
@@ -92,9 +102,12 @@
             "fixedFee": 20000
           },
           "expected": {
-            "txId": "",
-            "inputs": [0, 1],
-            "outputs": 1,
+            "txId": "aea12192dc41d625a0317366a0a7b0964a6534404f1fdd456084713f73a4faee",
+            "inputs": [
+              0,
+              1
+            ],
+            "change": 0,
             "fee": 20000
           }
         },
@@ -102,7 +115,7 @@
           "description": "allows a fee of zero",
           "outputs": [
             {
-              "address": "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa",
+              "address": "n2PEoV6Abxnrpzoqqq1TJT5kw8G2dMPpBd",
               "value": 180000
             }
           ],
@@ -110,9 +123,12 @@
             "fixedFee": 0
           },
           "expected": {
-            "txId": "",
-            "inputs": [0, 1],
-            "outputs": 2,
+            "txId": "c809a4fb2f08b04537582f337de9118c5c56c1e9d9f77d24b3c3ea5863b3cea8",
+            "inputs": [
+              0,
+              1
+            ],
+            "change": 20000,
             "fee": 0
           }
         },
@@ -120,7 +136,7 @@
           "description": "allows a custom change address",
           "outputs": [
             {
-              "address": "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa",
+              "address": "n2PEoV6Abxnrpzoqqq1TJT5kw8G2dMPpBd",
               "value": 180000
             }
           ],
@@ -128,10 +144,13 @@
             "changeAddress": "mtQrg4dcAVhDDzbyXawmRbpzRTRiUgfAE5"
           },
           "expected": {
-            "txId": "",
-            "inputs": [0, 1],
-            "outputs": 2,
-            "fee": 0
+            "txId": "de3e6ae40e3e942b056f33fd04e90e6e189747f190c589831ac86281bdb3be93",
+            "inputs": [
+              0,
+              1
+            ],
+            "change": 10000,
+            "fee": 10000
           }
         }
       ],
@@ -186,15 +205,17 @@
           "description": "does not overestimate fees when network has dustSoftThreshold",
           "outputs": [
             {
-              "address": "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa",
+              "address": "Lg6EmeK1sbbfJh2PJQ2NkYwCHM2buUDWjT",
               "value": 200000
             }
           ],
           "options": {},
           "expected": {
-            "txId": "",
-            "inputs": [0, 1],
-            "outputs": 2,
+            "txId": "ce3a79d9d3754b23c740b5dd370f5126c6f45d37dbe53f66b046bb27fc547e94",
+            "inputs": [
+              0
+            ],
+            "change": 100000,
             "fee": 100000
           }
         }
