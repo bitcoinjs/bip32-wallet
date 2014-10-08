@@ -104,6 +104,10 @@ Wallet.prototype.getConfirmedBalance = function() {
   }, 0)
 }
 
+Wallet.prototype.ownsAddress = function(address) {
+  return this.account.containsAddress(address)
+}
+
 Wallet.prototype.setUnspentOutputs = function(unspents) {
   unspents.forEach(function(unspent) {
     var txId = unspent.txId

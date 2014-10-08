@@ -204,6 +204,24 @@ describe('Wallet', function() {
         })
       })
 
+      describe('ownsAddress', function() {
+        beforeEach(function() {
+          for (var i = 2; i < f.addresses.length; i += 2) {
+            wallet.generateAddress()
+          }
+        })
+
+        it('returns true for known addresses', function() {
+          f.addresses.forEach(function(address) {
+            assert(wallet.ownsAddress(address))
+          })
+        })
+
+        it('returns false for unknown addresses', function() {
+          assert(!wallet.ownsAddress('1MsHWS1BnwMc3tLE8G35UXsS58fKipzB7a'))
+        })
+      })
+
       describe('setUnspentOutputs', function() {
         it('sets wallet.unspents correctly', function() {
           wallet.setUnspentOutputs(f.unspents)
