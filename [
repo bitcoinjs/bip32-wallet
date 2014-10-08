@@ -25,8 +25,8 @@ Wallet.fromSeedBuffer = function(seed, network) {
   // See https://bitcointalk.org/index.php?topic=405179.msg4415254#msg4415254
   var m = HDNode.fromSeedBuffer(seed, network)
   var i = m.deriveHardened(0)
-  var external = i.derive(0)
-  var internal = i.derive(1)
+  var external = i.derive(0).neutered()
+  var internal = i.derive(1).neutered()
 
   return new Wallet(external, internal)
 }
@@ -68,7 +68,7 @@ Wallet.prototype.createTransaction = function(outputs, external, internal) {
   // ensure fee isn't crazy (max 0.1 BTC)
   assert(selection.fee < 0.1 * 1e8, 'Very high fee: ' + selection.fee)
 
-  return this.signWith(txb, addresses, external, internal).build()
+  return this.signWith(txb, addresses, hdNode).build()
 }
 
 Wallet.prototype.generateAddress = function() {
@@ -104,10 +104,6 @@ Wallet.prototype.getConfirmedBalance = function() {
   }, 0)
 }
 
-Wallet.prototype.ownsAddress = function(address) {
-  return this.account.containsAddress(address)
-}
-
 Wallet.prototype.setUnspentOutputs = function(unspents) {
   unspents.forEach(function(unspent) {
     var txId = unspent.txId
@@ -125,9 +121,11 @@ Wallet.prototype.setUnspentOutputs = function(unspents) {
   this.unspents = unspents
 }
 
-Wallet.prototype.signWith = function(tx, addresses, external, internal) {
-  external = external || this.external
-  internal = internal || this.internal
+Wallet.prototype.signWith = function(tx, addresses, hdNode) {
+  hdNode = hdNode || this.hdNode
+
+  var external = hdNode.derive(0)
+  var internal = hdNode.derive(1)
 
   var nodes = this.account.getNodes(addresses, external, internal)
   var keys = nodes.map(function(node) { return node.privKey })
