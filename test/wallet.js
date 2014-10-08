@@ -53,46 +53,24 @@ describe('Wallet', function() {
       //it('throws there is not enough money', function() {
       //it('throws there is not enough money (incl. fee)', function() {
       describe('createTransaction', function() {
-        var unspentsMap
-
         beforeEach(function() {
           for (var i = 2; i < f.addresses.length; i += 2) {
             wallet.generateAddress()
           }
 
           wallet.setUnspentOutputs(f.unspents)
-
-          unspentsMap = {}
-          f.unspents.forEach(function(unspent) {
-            unspentsMap[unspent.txId + ':' + unspent.vout] = unspent
-          })
         })
 
         f.transactions.forEach(function(t) {
           it(t.description, function() {
             var tx = wallet.createTransaction(t.outputs, t.options)
+            var totalInputValue = 0
 
-            var inputTotal = 0
-            tx.ins.forEach(function(txIn) {
-              var txId = bitcoinjs.bufferutils.reverse(txIn.hash).toString('hex')
-              var unspent = unspentsMap[txId + ':' + txIn.index]
-              inputTotal += unspent.value
-            })
-
-            var expectedTotal = t.outputs.reduce(function(a, x) { return a + x.value }, 0)
-            var outputTotal = tx.outs.reduce(function(a, x) { return a + x.value }, 0)
-            var fee = inputTotal - outputTotal
-            var change = outputTotal - expectedTotal
-
-            assert.equal(change, t.expected.change)
-            assert.equal(fee, t.expected.fee)
-
-            // if change is expected, make sure outputs length matches
-            assert.equal(tx.outs.length, t.outputs.length + !!t.expected.change)
-
-            // ensure only expected inputs are found
+            // ensure only expected inputs are found (and sum input values)
             t.expected.inputs.forEach(function(index) {
               var unspent = f.unspents[index]
+
+              totalInputValue += unspent.value
 
               assert(tx.ins.some(function(txIn) {
                 var txId = bitcoinjs.bufferutils.reverse(txIn.hash).toString('hex')
@@ -100,6 +78,17 @@ describe('Wallet', function() {
                 return unspent.txId === txId && unspent.vout === txIn.index
               }))
             })
+
+            var expectedOutputValue = t.outputs.reduce(function(a, x) { return a + x.value }, 0)
+            var totalOutputValue = tx.outs.reduce(function(a, x) { return a + x.value }, 0)
+            var fee = totalInputValue - totalOutputValue
+            var change = totalOutputValue - expectedOutputValue
+
+            assert.equal(change, t.expected.change)
+            assert.equal(fee, t.expected.fee)
+
+            // if change is expected, make sure outputs length matches
+            assert.equal(tx.outs.length, t.outputs.length + !!t.expected.change)
 
             // ensure only expected outputs are found
             t.outputs.forEach(function(output) {
