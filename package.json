@@ -1,6 +1,6 @@
 {
   "name": "bip32-wallet",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "",
   "main": "./src/index.js",
   "scripts": {
@@ -18,8 +18,8 @@
   },
   "homepage": "https://https://github.com/dcousens/bip32-wallet",
   "devDependencies": {
-    "istanbul": "*",
-    "mocha": "*",
+    "istanbul": "^0.3.2",
+    "mocha": "^1.21.4",
     "sinon": "^1.10.3"
   },
   "dependencies": {
