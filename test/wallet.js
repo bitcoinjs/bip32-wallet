@@ -96,7 +96,7 @@ describe('Wallet', function() {
 
             // enforce the change address is as expected
             if (tx.outs.length > t.outputs.length) {
-              var changeAddress = t.options.changeAddress || wallet.getChangeAddress()
+              var changeAddress = wallet.getChangeAddress()
 
               assert(tx.outs.some(function(txOut) {
                 var address = bitcoinjs.Address.fromOutputScript(txOut.script, wallet.network).toString()
