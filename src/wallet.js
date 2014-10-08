@@ -43,7 +43,7 @@ Wallet.prototype.createTransaction = function(outputs, options) {
 
   // confirmed only, sort by descending value
   var unspents = this.unspents.filter(function(unspent) {
-    return !!unspent.blockHash
+    return unspent.confirmations > 0
   }).sort(function(o1, o2) {
     return o2.value - o1.value
   })
@@ -125,7 +125,7 @@ Wallet.prototype.getChangeAddress = function() {
 
 Wallet.prototype.getConfirmedBalance = function() {
   return this.unspents.filter(function(unspent) {
-    return !!unspent.blockHash
+    return unspent.confirmations > 0
 
   }).reduce(function(accum, unspent) {
     return accum + unspent.value
@@ -135,19 +135,13 @@ Wallet.prototype.getConfirmedBalance = function() {
 Wallet.prototype.setUnspentOutputs = function(unspents) {
   unspents.forEach(function(unspent) {
     var txId = unspent.txId
-    var blockHash = unspent.blockHash
 
     assert.equal(typeof txId, 'string', 'Expected txId, got ' + txId)
     assert.equal(txId.length, 64, 'Expected valid txId, got ' + txId)
-
-    if (blockHash !== null) {
-      assert.equal(typeof blockHash, 'string', 'Expected blockHash, got ' + blockHash)
-      assert.equal(blockHash.length, 64, 'Expected valid blockHash, got ' + blockHash)
-    }
-
     assert.doesNotThrow(function() {
       Address.fromBase58Check(unspent.address)
     }, 'Expected Base58 Address, got ' + unspent.address)
+    assert(isFinite(unspent.confirmations), 'Expected number confirmations, got ' + unspent.confirmations)
     assert(isFinite(unspent.vout), 'Expected number vout, got ' + unspent.vout)
     assert(isFinite(unspent.value), 'Expected number value, got ' + unspent.value)
   })

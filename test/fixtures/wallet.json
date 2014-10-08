@@ -175,33 +175,29 @@
       "unspents": [
         {
           "txId": "839691f0e681fbfc5f7a3812b616027d6fd74f17540b33cdb78d6e7711c0f6e7",
-          "blockHash": "e957fb273ad72967b4914edd39c2dbc2796c696d6c7852d9386fc8ff66ebec5f",
-          "blockHeight": 298368,
           "address": "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa",
+          "confirmations": 3,
           "vout": 0,
           "value": 25000
         },
         {
           "txId": "51241b0849daa625769f186ac5226be81765720145bbfb468e8a2ce49b690279",
-          "blockHash": "e957fb273ad72967b4914edd39c2dbc2796c696d6c7852d9386fc8ff66ebec5f",
-          "blockHeight": 298368,
           "address": "n2fiWrHqD6GM5GiEqkbWAc6aaZQp3ba93X",
+          "confirmations": 1,
           "vout": 1,
           "value": 175000
         },
         {
           "txId": "a364fbde6ff00ed996b6668bacf60d0a00ca0a31bbdf94127721d2cd3242622c",
-          "blockHash": null,
-          "blockHeight": null,
           "address": "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa",
+          "confirmations": 0,
           "vout": 0,
           "value": 300000
         },
         {
           "txId": "7de1555df0c2700329e815b93b32c571c3ea54dc967b89e81ab73b9972b72d1d",
-          "blockHash": null,
-          "blockHeight": null,
           "address": "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa",
+          "confirmations": 0,
           "vout": 0,
           "value": 60000
         }
@@ -241,9 +237,8 @@
       "unspents": [
         {
           "txId": "839691f0e681fbfc5f7a3812b616027d6fd74f17540b33cdb78d6e7711c0f6e7",
-          "blockHash": "e957fb273ad72967b4914edd39c2dbc2796c696d6c7852d9386fc8ff66ebec5f",
-          "blockHeight": 298368,
           "address": "LeyySKbQrRRwodKEj1W4a8y3YQupPLw5os",
+          "confirmations": 253,
           "vout": 0,
           "value": 400000
         }
