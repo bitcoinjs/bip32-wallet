@@ -200,20 +200,22 @@ describe('Wallet', function() {
       })
 
       describe('signWith', function() {
-        it('signs Transaction inputs with respective keys', function() {
-          var addresses = wallet.getAddresses()
-          var hash = new Buffer(32)
-          hash.fill(1)
+        beforeEach(function() {
+          for (var i = 2; i < f.addresses.length; i += 2) {
+            wallet.generateAddress()
+          }
+        })
 
+        it('signs Transaction inputs with respective keys', function() {
           var txb = new bitcoinjs.TransactionBuilder()
 
-          addresses.forEach(function(address, i) {
-            txb.addInput(hash, i)
+          f.unspents.forEach(function(unspent) {
+            txb.addInput(unspent.txId, unspent.vout)
           })
 
-          wallet.generateAddress()
-          txb.addOutput(wallet.getChangeAddress(), 1e5)
+          txb.addOutput(wallet.getAddress(), 1e5)
 
+          var addresses = f.unspents.map(function(unspent) { return unspent.address })
           var tx = wallet.signWith(txb, addresses).build()
 
           addresses.forEach(function(address, i) {
