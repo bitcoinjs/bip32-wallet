@@ -49,7 +49,6 @@ describe('Wallet', function() {
       })
 
       // TODO
-      //it('signs the inputs with respective keys', function() {
       //it('throws when value is below dust threshold', function() {
       //it('throws there is not enough money', function() {
       //it('throws there is not enough money (incl. fee)', function() {
@@ -200,7 +199,31 @@ describe('Wallet', function() {
         // TODO: test validation
       })
 
-      describe.skip('signWith', function() {})
+      describe('signWith', function() {
+        it('signs Transaction inputs with respective keys', function() {
+          var addresses = wallet.getAddresses()
+          var hash = new Buffer(32)
+          hash.fill(1)
+
+          var txb = new bitcoinjs.TransactionBuilder()
+
+          addresses.forEach(function(address, i) {
+            txb.addInput(hash, i)
+          })
+
+          wallet.generateAddress()
+          txb.addOutput(wallet.getChangeAddress(), 1e5)
+
+          var tx = wallet.signWith(txb, addresses).build()
+
+          addresses.forEach(function(address, i) {
+            var input = tx.ins[i]
+            var pubKey = bitcoinjs.ECPubKey.fromBuffer(input.script.chunks[1])
+
+            assert.equal(pubKey.getAddress(wallet.network).toString(), address)
+          })
+        })
+      })
     })
   })
 })
