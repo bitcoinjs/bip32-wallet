@@ -10,7 +10,18 @@ var TransactionBuilder = bitcoinjs.TransactionBuilder
 
 var selectInputs = require('./selection')
 
-function Wallet(seed, network) {
+function Wallet(external, internal) {
+  this.account = new bip32utils.Account(external.neutered(), internal.neutered())
+  this.network = external.network
+  this.unspents = []
+
+  // A closure is used to avoid accidental serialization
+  this.getChainNodes = function() {
+    return [external, internal]
+  }
+}
+
+Wallet.fromSeedBuffer = function(seed, network) {
   network = network || networks.bitcoin
 
   // HD first-level child derivation method should be hardened
@@ -20,13 +31,7 @@ function Wallet(seed, network) {
   var external = i.derive(0)
   var internal = i.derive(1)
 
-  this.account = new bip32utils.Account(external.neutered(), internal.neutered())
-  this.network = network
-  this.unspents = []
-
-  // Getters in a closure to avoid accidental serialization
-  this.getExternal = function() { return external }
-  this.getInternal = function() { return internal }
+  return new Wallet(external, internal, network)
 }
 
 Wallet.prototype.createTransaction = function(outputs) {
@@ -117,8 +122,10 @@ Wallet.prototype.setUnspentOutputs = function(unspents) {
 }
 
 Wallet.prototype.signWith = function(tx, addresses) {
-  var external = this.getExternal()
-  var internal = this.getInternal()
+  var chainNodes = this.getChainNodes()
+  var external = chainNodes[0]
+  var internal = chainNodes[1]
+
   var nodes = this.account.getNodes(addresses, external, internal)
   var keys = nodes.map(function(node) { return node.privKey })
 

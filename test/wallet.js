@@ -7,11 +7,29 @@ var fixtures = require('./fixtures/wallet.json')
 
 describe('Wallet', function() {
   describe('constructor', function() {
+    var external, internal, wallet
+
+    beforeEach(function() {
+      var seed = new Buffer(32)
+      var m = bitcoinjs.HDNode.fromSeedBuffer(seed)
+
+      external = m.derive(0)
+      internal = m.derive(1)
+
+      wallet = new Wallet(external, internal)
+    })
+
+    it('uses the external nodes network', function() {
+      assert.equal(external.network, bitcoinjs.networks.bitcoin)
+    })
+  })
+
+  describe('fromSeedBuffer', function() {
     var seed, wallet
 
     beforeEach(function() {
       seed = new Buffer(32)
-      wallet = new Wallet(seed)
+      wallet = Wallet.fromSeedBuffer(seed)
     })
 
     it('defaults to Bitcoin network', function() {
@@ -19,19 +37,19 @@ describe('Wallet', function() {
     })
 
     it('uses the network if specified', function() {
-      wallet = new Wallet(seed, bitcoinjs.networks.testnet)
+      wallet = Wallet.fromSeedBuffer(seed, bitcoinjs.networks.testnet)
 
       assert.equal(wallet.network, bitcoinjs.networks.testnet)
     })
 
     it("generates m/0'/0 as the external chain node", function() {
-      var external = wallet.getExternal()
+      var external = wallet.getChainNodes()[0]
       assert.equal(external.index, 0)
       assert.equal(external.depth, 2)
     })
 
     it("generates m/0'/1 as the internal chain node", function() {
-      var internal = wallet.getInternal()
+      var internal = wallet.getChainNodes()[1]
       assert.equal(internal.index, 1)
       assert.equal(internal.depth, 2)
     })
@@ -45,7 +63,7 @@ describe('Wallet', function() {
         var seed = new Buffer(f.seed, 'hex')
         var network = bitcoinjs.networks[f.network]
 
-        wallet = new Wallet(seed, network)
+        wallet = Wallet.fromSeedBuffer(seed, network)
       })
 
       // TODO
