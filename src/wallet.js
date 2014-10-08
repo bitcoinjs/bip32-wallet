@@ -7,7 +7,8 @@ var networks = bitcoinjs.networks
 var Address = bitcoinjs.Address
 var HDNode = bitcoinjs.HDNode
 var TransactionBuilder = bitcoinjs.TransactionBuilder
-var Script = bitcoinjs.Script
+
+var selectInputs = require('./selection')
 
 function Wallet(seed, network) {
   network = network || networks.bitcoin
@@ -28,73 +29,39 @@ function Wallet(seed, network) {
   this.getInternal = function() { return internal }
 }
 
-function estimatePaddedFee(tx, network) {
-  var tmpTx = tx.clone()
-  tmpTx.addOutput(Script.EMPTY, network.dustSoftThreshold || 0)
-
-  return network.estimateFee(tmpTx)
-}
-
-Wallet.prototype.createTransaction = function(outputs, options) {
-  options = options || {}
-
-  var changeAddress = options.changeAddress
-  var fixedFee = options.fixedFee
-
-  // confirmed only, sort by descending value
+Wallet.prototype.createTransaction = function(outputs) {
+  // filter un-confirmed
   var unspents = this.unspents.filter(function(unspent) {
     return unspent.confirmations > 0
-  }).sort(function(o1, o2) {
-    return o2.value - o1.value
   })
 
+  var selection = selectInputs(unspents, outputs, this.network)
+  var inputs = selection.inputs
+
   var txb = new TransactionBuilder()
-  var targetValue = 0
+  var addresses = inputs.map(function(input) { return input.address })
+
+  inputs.forEach(function(input) {
+    txb.addInput(input.txId, input.vout)
+  })
 
   outputs.forEach(function(output) {
-    if (output.value <= this.network.dustThreshold) {
-      throw new Error(output.value + ' must be above dust threshold (' + this.network.dustThreshold + ' Satoshis)')
-    }
-
-    targetValue += output.value
     txb.addOutput(output.address, output.value)
-  }, this)
+  })
 
-  var accum = 0
-  var addresses = []
-  var subTotal = targetValue
+  if (selection.change > this.network.dustThreshold) {
+    var changeAddress = this.getChangeAddress()
 
-  for (var i = 0; i < unspents.length; ++i) {
-    var unspent = unspents[i]
-    addresses.push(unspent.address)
-
-    txb.addInput(unspent.txId, unspent.vout)
-
-    var fee
-    if (fixedFee === undefined) {
-      fee = estimatePaddedFee(txb.buildIncomplete(), this.network)
-
-    } else {
-      fee = fixedFee
-    }
-
-    accum += unspent.value
-    subTotal = targetValue + fee
-
-    if (accum >= subTotal) {
-      var change = accum - subTotal
-
-      if (change > this.network.dustThreshold) {
-        txb.addOutput(changeAddress || this.getChangeAddress(), change)
-      }
-
-      break
-    }
+    txb.addOutput(changeAddress, selection.change)
   }
 
-  if (accum < subTotal) {
-    throw new Error('Not enough funds (incl. fee): ' + accum + ' < ' + subTotal)
-  }
+  // sanity check (until things are battle tested)
+  var totalInputValue = inputs.reduce(function(a, x) { return a + x.value }, 0)
+  var totalOutputValue = outputs.reduce(function(a, x) { return a + x.value }, 0)
+  assert.equal(totalInputValue - totalOutputValue, selection.change + selection.fee)
+
+  // ensure fee isn't crazy (max 0.1 BTC)
+  assert(selection.fee < 0.1 * 1e8, 'Very high fee: ' + selection.fee)
 
   return this.signWith(txb, addresses).build()
 }

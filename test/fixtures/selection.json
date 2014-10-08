@@ -1,0 +1,89 @@
+{
+  "valid": [
+    {
+      "description": "singular output | no change",
+      "network": "bitcoin",
+      "outputs": [100000],
+      "unspents": [30000, 110000],
+      "expected": {
+        "inputs": [1],
+        "fee": 10000,
+        "change": 0
+      }
+    },
+    {
+      "description": "singular output | change expected",
+      "network": "bitcoin",
+      "outputs": [90000],
+      "unspents": [30000, 110000],
+      "expected": {
+        "inputs": [1],
+        "fee": 10000,
+        "change": 10000
+      }
+    },
+    {
+      "description": "singular output | fee > 10000 | no change",
+      "network": "bitcoin",
+      "outputs": [60000],
+      "unspents": [10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000],
+      "expected": {
+        "inputs": [0, 1, 2, 3, 4, 5, 6, 7],
+        "fee": 20000,
+        "change": 0
+      }
+    },
+    {
+      "description": "singular output | fee > 10000 | change expected",
+      "network": "bitcoin",
+      "outputs": [55000],
+      "unspents": [10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000],
+      "expected": {
+        "inputs": [0, 1, 2, 3, 4, 5, 6, 7],
+        "fee": 20000,
+        "change": 5000
+      }
+    },
+    {
+      "description": "multiple outputs | no change",
+      "network": "bitcoin",
+      "outputs": [35000, 5000, 5000, 1000],
+      "unspents": [30000, 16000, 10000],
+      "expected": {
+        "inputs": [0, 1, 2],
+        "fee": 10000,
+        "change": 0
+      }
+    },
+    {
+      "description": "multiple outputs | change expected",
+      "network": "bitcoin",
+      "outputs": [35000, 5000, 2000, 1000],
+      "unspents": [30000, 16000, 10000],
+      "expected": {
+        "inputs": [0, 1, 2],
+        "fee": 10000,
+        "change": 3000
+      }
+    },
+    {
+      "description": "no outputs | change expected",
+      "network": "bitcoin",
+      "outputs": [],
+      "unspents": [30000, 16000, 10000],
+      "expected": {
+        "inputs": [0],
+        "fee": 10000,
+        "change": 20000
+      }
+    }
+  ],
+  "invalid": [
+    {
+      "exception": "Not enough funds \\(incl\\. fee\\): 40000 < 50000",
+      "network": "bitcoin",
+      "outputs": [40000],
+      "unspents": [40000]
+    }
+  ]
+}
