@@ -82,7 +82,7 @@ Wallet.prototype.getAddress = function() {
 }
 
 Wallet.prototype.getAddresses = function() {
-  return this.account.addresses
+  return this.account.getAddresses()
 }
 
 Wallet.prototype.getBalance = function() {
