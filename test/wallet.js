@@ -66,7 +66,7 @@ describe('Wallet', function() {
             var tx = wallet.createTransaction(t.outputs, t.options)
             var totalInputValue = 0
 
-            // ensure only expected inputs are found (and sum input values)
+            // ensure all expected inputs are found (and sum input values)
             t.expected.inputs.forEach(function(index) {
               var unspent = f.unspents[index]
 
@@ -79,18 +79,10 @@ describe('Wallet', function() {
               }))
             })
 
-            var expectedOutputValue = t.outputs.reduce(function(a, x) { return a + x.value }, 0)
-            var totalOutputValue = tx.outs.reduce(function(a, x) { return a + x.value }, 0)
-            var fee = totalInputValue - totalOutputValue
-            var change = totalOutputValue - expectedOutputValue
+            // ensure no other inputs exist
+            assert.equal(tx.ins.length, t.expected.inputs.length)
 
-            assert.equal(change, t.expected.change)
-            assert.equal(fee, t.expected.fee)
-
-            // if change is expected, make sure outputs length matches
-            assert.equal(tx.outs.length, t.outputs.length + !!t.expected.change)
-
-            // ensure only expected outputs are found
+            // ensure all expected outputs are found
             t.outputs.forEach(function(output) {
               assert(tx.outs.some(function(txOut) {
                 var address = bitcoinjs.Address.fromOutputScript(txOut.script, wallet.network).toString()
@@ -99,13 +91,29 @@ describe('Wallet', function() {
               }))
             })
 
-            if (t.options.changeAddress) {
+            // ensure no other outputs exist (unless change is expected)
+            assert.equal(tx.outs.length, t.outputs.length + !!t.expected.change)
+
+            // enforce the change address is as expected
+            if (tx.outs.length > t.outputs.length) {
+              var changeAddress = t.options.changeAddress || wallet.getChangeAddress()
+
               assert(tx.outs.some(function(txOut) {
                 var address = bitcoinjs.Address.fromOutputScript(txOut.script, wallet.network).toString()
 
-                return t.options.changeAddress === address
+                return changeAddress === address
               }))
             }
+
+            // validate total input/output values
+            var totalOutputValue = tx.outs.reduce(function(a, x) { return a + x.value }, 0)
+
+            var expectedOutputValue = t.outputs.reduce(function(a, x) { return a + x.value }, 0)
+            var change = totalOutputValue - expectedOutputValue
+            var fee = totalInputValue - totalOutputValue
+
+            assert.equal(change, t.expected.change)
+            assert.equal(fee, t.expected.fee)
 
             // catch-all verification
             assert.equal(tx.getId(), t.expected.txId)
