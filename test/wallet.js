@@ -1,5 +1,6 @@
 var assert = require('assert')
 var bitcoinjs = require('bitcoinjs-lib')
+var sinon = require('sinon')
 
 var Wallet = require('../src/wallet')
 
@@ -140,33 +141,46 @@ describe('Wallet', function() {
       })
 
       describe('generateAddress', function() {
-        it('generates a new external (and internal) Address', function() {
-          assert.deepEqual(wallet.getAddresses(), [
-            f.addresses[0],
-            f.addresses[f.addresses.length / 2]
-          ])
+        it('calls the expected account functions', sinon.test(function() {
+          this.mock(wallet.account).expects('nextAddress')
+            .once()
+
+          this.mock(wallet.account).expects('getAddress')
+            .once()
 
           wallet.generateAddress()
+        }))
 
-          assert.deepEqual(wallet.getAddresses(), f.addresses.slice(0, 4))
-        })
-
-        it('returns the latest external Address', function() {
+        it('returns the new external Address', function() {
           var result = wallet.generateAddress()
 
-          assert.deepEqual(result, wallet.getAddress())
+          assert.equal(result, wallet.getAddress())
         })
       })
 
       describe('getAddress', function() {
-        it('returns the latest internal Address', function() {
-          var expected = wallet.account.external.get()
+        it('wraps account.getAddress', sinon.test(function() {
+          this.mock(wallet.account).expects('getAddress')
+            .once()
 
-          assert.deepEqual(wallet.getAddress(), expected)
+          wallet.getAddress()
+        }))
+
+        it('returns the current external Address', function() {
+          wallet.generateAddress()
+
+          assert.equal(wallet.getAddress(), wallet.account.external.get())
         })
       })
 
       describe('getAddresses', function() {
+        it('wraps account.getAddresses', sinon.test(function() {
+          this.mock(wallet.account).expects('getAddresses')
+            .once()
+
+          wallet.getAddresses()
+        }))
+
         it('returns all known addresses', function() {
           for (var i = 2; i < f.addresses.length; i += 2) {
             wallet.generateAddress()
@@ -187,10 +201,17 @@ describe('Wallet', function() {
       })
 
       describe('getChangeAddress', function() {
-        it('returns the latest internal Address', function() {
-          var expected = wallet.account.internal.get()
+        it('wraps account.getChangeAddress', sinon.test(function() {
+          this.mock(wallet.account).expects('getChangeAddress')
+            .once()
 
-          assert.deepEqual(wallet.getChangeAddress(), expected)
+          wallet.getChangeAddress()
+        }))
+
+        it('returns the current internal Address', function() {
+          wallet.generateAddress()
+
+          assert.equal(wallet.getChangeAddress(), wallet.account.internal.get())
         })
       })
 
@@ -205,19 +226,24 @@ describe('Wallet', function() {
       })
 
       describe('ownsAddress', function() {
-        beforeEach(function() {
+        it('wraps account.containsAddress', sinon.test(function() {
+          var address = wallet.getAddress()
+
+          this.mock(wallet.account).expects('containsAddress')
+            .once().calledWith(address)
+
+          wallet.ownsAddress(address)
+        }))
+
+        it('returns the expected results', function() {
           for (var i = 2; i < f.addresses.length; i += 2) {
             wallet.generateAddress()
           }
-        })
 
-        it('returns true for known addresses', function() {
           f.addresses.forEach(function(address) {
             assert(wallet.ownsAddress(address))
           })
-        })
 
-        it('returns false for unknown addresses', function() {
           assert(!wallet.ownsAddress('1MsHWS1BnwMc3tLE8G35UXsS58fKipzB7a'))
         })
       })
