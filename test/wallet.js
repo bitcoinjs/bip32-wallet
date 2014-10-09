@@ -74,7 +74,7 @@ describe('Wallet', function() {
       describe('createTransaction', function() {
         beforeEach(function() {
           for (var i = 2; i < f.addresses.length; i += 2) {
-            wallet.generateAddress()
+            wallet.nextAddress()
           }
 
           wallet.setUnspentOutputs(f.unspents)
@@ -140,34 +140,14 @@ describe('Wallet', function() {
         })
       })
 
-      describe('generateAddress', function() {
-        it('calls the expected account functions', sinon.test(function() {
-          this.mock(wallet.account).expects('nextAddress')
-            .once()
-
-          this.mock(wallet.account).expects('getAddress')
-            .once()
-
-          wallet.generateAddress()
-        }))
-
-        it('returns the new external Address', function() {
-          var result = wallet.generateAddress()
-
-          assert.equal(result, wallet.getAddress())
-        })
-      })
-
       describe('getAddress', function() {
         it('wraps account.getAddress', sinon.test(function() {
-          this.mock(wallet.account).expects('getAddress')
-            .once()
-
+          this.mock(wallet.account).expects('getAddress').once()
           wallet.getAddress()
         }))
 
         it('returns the current external Address', function() {
-          wallet.generateAddress()
+          wallet.nextAddress()
 
           assert.equal(wallet.getAddress(), wallet.account.external.get())
         })
@@ -175,18 +155,40 @@ describe('Wallet', function() {
 
       describe('getAddresses', function() {
         it('wraps account.getAddresses', sinon.test(function() {
-          this.mock(wallet.account).expects('getAddresses')
-            .once()
-
+          this.mock(wallet.account).expects('getAddresses').once()
           wallet.getAddresses()
         }))
 
         it('returns all known addresses', function() {
-          for (var i = 2; i < f.addresses.length; i += 2) {
-            wallet.generateAddress()
-          }
+          for (var i = 2; i < f.addresses.length; i += 2) wallet.nextAddress()
 
           assert.deepEqual(wallet.getAddresses(), f.addresses)
+        })
+      })
+
+      describe('getChangeAddress', function() {
+        it('wraps account.getChangeAddress', sinon.test(function() {
+          this.mock(wallet.account).expects('getChangeAddress').once()
+          wallet.getChangeAddress()
+        }))
+
+        it('returns the current internal Address', function() {
+          wallet.nextAddress()
+
+          assert.equal(wallet.getChangeAddress(), wallet.account.internal.get())
+        })
+      })
+
+      describe('nextAddress', function() {
+        it('wraps account.nextAddress', sinon.test(function() {
+          this.mock(wallet.account).expects('nextAddress').once()
+          wallet.nextAddress()
+        }))
+
+        it('returns the new external Address', function() {
+          var result = wallet.nextAddress()
+
+          assert.equal(result, wallet.getAddress())
         })
       })
 
@@ -200,21 +202,6 @@ describe('Wallet', function() {
         })
       })
 
-      describe('getChangeAddress', function() {
-        it('wraps account.getChangeAddress', sinon.test(function() {
-          this.mock(wallet.account).expects('getChangeAddress')
-            .once()
-
-          wallet.getChangeAddress()
-        }))
-
-        it('returns the current internal Address', function() {
-          wallet.generateAddress()
-
-          assert.equal(wallet.getChangeAddress(), wallet.account.internal.get())
-        })
-      })
-
       describe('getConfirmedBalance', function() {
         beforeEach(function() {
           wallet.setUnspentOutputs(f.unspents)
@@ -225,26 +212,26 @@ describe('Wallet', function() {
         })
       })
 
-      describe('ownsAddress', function() {
+      describe('containsAddress', function() {
         it('wraps account.containsAddress', sinon.test(function() {
           var address = wallet.getAddress()
 
           this.mock(wallet.account).expects('containsAddress')
             .once().calledWith(address)
 
-          wallet.ownsAddress(address)
+          wallet.containsAddress(address)
         }))
 
         it('returns the expected results', function() {
           for (var i = 2; i < f.addresses.length; i += 2) {
-            wallet.generateAddress()
+            wallet.nextAddress()
           }
 
           f.addresses.forEach(function(address) {
-            assert(wallet.ownsAddress(address))
+            assert(wallet.containsAddress(address))
           })
 
-          assert(!wallet.ownsAddress('1MsHWS1BnwMc3tLE8G35UXsS58fKipzB7a'))
+          assert(!wallet.containsAddress('1MsHWS1BnwMc3tLE8G35UXsS58fKipzB7a'))
         })
       })
 
@@ -261,7 +248,7 @@ describe('Wallet', function() {
       describe('signWith', function() {
         beforeEach(function() {
           for (var i = 2; i < f.addresses.length; i += 2) {
-            wallet.generateAddress()
+            wallet.nextAddress()
           }
         })
 

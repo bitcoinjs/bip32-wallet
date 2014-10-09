@@ -74,28 +74,16 @@ Wallet.prototype.createTransaction = function(outputs, external, internal) {
   return this.signWith(txb, addresses, external, internal).build()
 }
 
-Wallet.prototype.generateAddress = function() {
-  this.account.nextAddress()
-
-  return this.getAddress()
-}
-
-Wallet.prototype.getAddress = function() {
-  return this.account.getAddress()
-}
-
-Wallet.prototype.getAddresses = function() {
-  return this.account.getAddresses()
-}
+Wallet.prototype.containsAddress = function(address) { return this.account.containsAddress(address) }
+Wallet.prototype.getAddress = function() { return this.account.getAddress() }
+Wallet.prototype.getAddresses = function() { return this.account.getAddresses() }
+Wallet.prototype.getChangeAddress = function() { return this.account.getChangeAddress() }
+Wallet.prototype.nextAddress = function() { return this.account.nextAddress() }
 
 Wallet.prototype.getBalance = function() {
   return this.unspents.reduce(function(accum, unspent) {
     return accum + unspent.value
   }, 0)
-}
-
-Wallet.prototype.getChangeAddress = function() {
-  return this.account.getChangeAddress()
 }
 
 Wallet.prototype.getConfirmedBalance = function() {
@@ -105,10 +93,6 @@ Wallet.prototype.getConfirmedBalance = function() {
   }).reduce(function(accum, unspent) {
     return accum + unspent.value
   }, 0)
-}
-
-Wallet.prototype.ownsAddress = function(address) {
-  return this.account.containsAddress(address)
 }
 
 Wallet.prototype.setUnspentOutputs = function(unspents) {
