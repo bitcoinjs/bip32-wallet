@@ -133,10 +133,9 @@ Wallet.prototype.signWith = function(tx, addresses, external, internal) {
   internal = internal || this.internal
 
   var nodes = this.account.getNodes(addresses, external, internal)
-  var keys = nodes.map(function(node) { return node.privKey })
 
-  keys.forEach(function(key, i) {
-    tx.sign(i, key)
+  nodes.forEach(function(node, i) {
+    tx.sign(i, node.privKey)
   })
 
   return tx
