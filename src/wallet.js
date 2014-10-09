@@ -43,8 +43,16 @@ Wallet.prototype.createTransaction = function(outputs, external, internal) {
   var selection = selectInputs(unspents, outputs, this.network)
   var inputs = selection.inputs
 
+  // sanity check (until things are battle tested)
+  var totalInputValue = inputs.reduce(function(a, x) { return a + x.value }, 0)
+  var totalOutputValue = outputs.reduce(function(a, x) { return a + x.value }, 0)
+  assert.equal(totalInputValue - totalOutputValue, selection.change + selection.fee)
+
+  // ensure fee isn't crazy (max 0.1 BTC)
+  assert(selection.fee < 0.1 * 1e8, 'Very high fee: ' + selection.fee)
+
+  // build transaction
   var txb = new TransactionBuilder()
-  var addresses = inputs.map(function(input) { return input.address })
 
   inputs.forEach(function(input) {
     txb.addInput(input.txId, input.vout)
@@ -54,20 +62,15 @@ Wallet.prototype.createTransaction = function(outputs, external, internal) {
     txb.addOutput(output.address, output.value)
   })
 
+  // is the change worth it?
   if (selection.change > this.network.dustThreshold) {
     var changeAddress = this.getChangeAddress()
 
     txb.addOutput(changeAddress, selection.change)
   }
 
-  // sanity check (until things are battle tested)
-  var totalInputValue = inputs.reduce(function(a, x) { return a + x.value }, 0)
-  var totalOutputValue = outputs.reduce(function(a, x) { return a + x.value }, 0)
-  assert.equal(totalInputValue - totalOutputValue, selection.change + selection.fee)
-
-  // ensure fee isn't crazy (max 0.1 BTC)
-  assert(selection.fee < 0.1 * 1e8, 'Very high fee: ' + selection.fee)
-
+  // sign and return
+  var addresses = inputs.map(function(input) { return input.address })
   return this.signWith(txb, addresses, external, internal).build()
 }
 
