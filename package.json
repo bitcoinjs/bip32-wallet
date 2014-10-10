@@ -4,7 +4,7 @@
   "description": "A BIP32 Wallet backed by bitcoinjs-lib, lite on features but heavily tested.",
   "main": "./src/index.js",
   "scripts": {
-    "coverage": "istanbul cover mocha -- test/*.js",
+    "coverage": "istanbul cover _mocha -- test/*.js",
     "coveralls": "npm run coverage && coveralls < coverage/lcov.info",
     "test": "istanbul test mocha -- --reporter list test/*.js"
   },
