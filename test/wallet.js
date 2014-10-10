@@ -69,8 +69,6 @@ describe('Wallet', function() {
 
       // TODO
       //it('throws when value is below dust threshold', function() {
-      //it('throws there is not enough money', function() {
-      //it('throws there is not enough money (incl. fee)', function() {
       describe('createTransaction', function() {
         beforeEach(function() {
           for (var i = 2; i < f.addresses.length; i += 2) {
