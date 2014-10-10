@@ -5,6 +5,7 @@
   "main": "./src/index.js",
   "scripts": {
     "coverage": "istanbul cover mocha -- test/*.js",
+    "coveralls": "npm run coverage && coveralls < coverage/lcov.info",
     "test": "istanbul test mocha -- --reporter list test/*.js"
   },
   "repository": {
@@ -18,6 +19,7 @@
   },
   "homepage": "https://https://github.com/dcousens/bip32-wallet",
   "devDependencies": {
+    "coveralls": "^2.11.2",
     "istanbul": "^0.3.2",
     "mocha": "^1.21.4",
     "sinon": "^1.10.3"
