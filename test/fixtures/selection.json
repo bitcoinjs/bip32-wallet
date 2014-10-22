@@ -80,6 +80,12 @@
   ],
   "invalid": [
     {
+      "exception": "Not enough funds \\(incl\\. fee\\): 20000 < 40000",
+      "network": "bitcoin",
+      "outputs": [40000],
+      "unspents": [10000, 10000]
+    },
+    {
       "exception": "Not enough funds \\(incl\\. fee\\): 40000 < 50000",
       "network": "bitcoin",
       "outputs": [40000],

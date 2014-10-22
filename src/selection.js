@@ -45,7 +45,7 @@ function selectInputs(unspents, outputs, network) {
 
   var accum = 0
   var candidates = []
-  var total
+  var total = targetValue
 
   for (var i = 0; i < sorted.length; ++i) {
     var unspent = sorted[i]
