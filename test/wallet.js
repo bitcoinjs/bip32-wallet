@@ -67,6 +67,29 @@ describe('Wallet', function() {
         wallet = Wallet.fromSeedBuffer(seed, network)
       })
 
+      describe('containsAddress', function() {
+        it('wraps account.containsAddress', sinon.test(function() {
+          var address = wallet.getReceiveAddress()
+
+          this.mock(wallet.account).expects('containsAddress')
+            .once().calledWith(address)
+
+          wallet.containsAddress(address)
+        }))
+
+        it('returns the expected results', function() {
+          for (var i = 2; i < f.addresses.length; i += 2) {
+            wallet.nextAddress()
+          }
+
+          f.addresses.forEach(function(address) {
+            assert(wallet.containsAddress(address))
+          })
+
+          assert(!wallet.containsAddress('1MsHWS1BnwMc3tLE8G35UXsS58fKipzB7a'))
+        })
+      })
+
       // TODO
       //it('throws when value is below dust threshold', function() {
       describe('createTransaction', function() {
@@ -138,35 +161,22 @@ describe('Wallet', function() {
         })
       })
 
-      describe('getAddress', function() {
-        it('wraps account.getAddress', sinon.test(function() {
-          this.mock(wallet.account).expects('getAddress').once()
-          wallet.getAddress()
-        }))
-
-        it('returns the current external Address', function() {
-          wallet.nextAddress()
-
-          assert.equal(wallet.getAddress(), wallet.account.external.get())
-        })
-      })
-
-      describe('getAddresses', function() {
-        it('wraps account.getAddresses', sinon.test(function() {
-          this.mock(wallet.account).expects('getAddresses').once()
-          wallet.getAddresses()
+      describe('getAllAddresses', function() {
+        it('wraps account.getAllAddresses', sinon.test(function() {
+          this.mock(wallet.account).expects('getAllAddresses').once()
+          wallet.getAllAddresses()
         }))
 
         it('returns all known addresses', function() {
           for (var i = 2; i < f.addresses.length; i += 2) wallet.nextAddress()
 
-          assert.deepEqual(wallet.getAddresses(), f.addresses)
+          assert.deepEqual(wallet.getAllAddresses(), f.addresses)
         })
       })
 
       describe('getChangeAddress', function() {
         it('wraps account.getChangeAddress', sinon.test(function() {
-          this.mock(wallet.account).expects('getChangeAddress').once()
+          this.mock(wallet.account).expects('getInternalAddress').once()
           wallet.getChangeAddress()
         }))
 
@@ -174,6 +184,41 @@ describe('Wallet', function() {
           wallet.nextAddress()
 
           assert.equal(wallet.getChangeAddress(), wallet.account.internal.get())
+        })
+      })
+
+      describe('getReceiveAddress', function() {
+        it('wraps account.getExternalAddress', sinon.test(function() {
+          this.mock(wallet.account).expects('getExternalAddress').once()
+          wallet.getReceiveAddress()
+        }))
+
+        it('returns the current external Address', function() {
+          wallet.nextAddress()
+
+          assert.equal(wallet.getReceiveAddress(), wallet.account.external.get())
+        })
+      })
+
+      describe('isReceiveAddress', function() {
+        it('wraps account.isExternalAddress', sinon.test(function() {
+          this.mock(wallet.account).expects('isExternalAddress').once()
+          wallet.isReceiveAddress()
+        }))
+
+        it('returns true for a valid receive address', function() {
+          assert(wallet.isReceiveAddress(wallet.getReceiveAddress()))
+        })
+      })
+
+      describe('isChangeAddress', function() {
+        it('wraps account.isInternalAddress', sinon.test(function() {
+          this.mock(wallet.account).expects('isInternalAddress').once()
+          wallet.isChangeAddress()
+        }))
+
+        it('returns true for a valid change address', function() {
+          assert(wallet.isChangeAddress(wallet.getChangeAddress()))
         })
       })
 
@@ -186,7 +231,7 @@ describe('Wallet', function() {
         it('returns the new external Address', function() {
           var result = wallet.nextAddress()
 
-          assert.equal(result, wallet.getAddress())
+          assert.equal(result, wallet.getReceiveAddress())
         })
       })
 
@@ -207,29 +252,6 @@ describe('Wallet', function() {
 
         it('sums confirmed unspents', function() {
           assert.equal(wallet.getConfirmedBalance(), f.confirmedBalance)
-        })
-      })
-
-      describe('containsAddress', function() {
-        it('wraps account.containsAddress', sinon.test(function() {
-          var address = wallet.getAddress()
-
-          this.mock(wallet.account).expects('containsAddress')
-            .once().calledWith(address)
-
-          wallet.containsAddress(address)
-        }))
-
-        it('returns the expected results', function() {
-          for (var i = 2; i < f.addresses.length; i += 2) {
-            wallet.nextAddress()
-          }
-
-          f.addresses.forEach(function(address) {
-            assert(wallet.containsAddress(address))
-          })
-
-          assert(!wallet.containsAddress('1MsHWS1BnwMc3tLE8G35UXsS58fKipzB7a'))
         })
       })
 
@@ -257,7 +279,7 @@ describe('Wallet', function() {
             txb.addInput(unspent.txId, unspent.vout)
           })
 
-          txb.addOutput(wallet.getAddress(), 1e5)
+          txb.addOutput(wallet.getReceiveAddress(), 1e5)
 
           var addresses = f.unspents.map(function(unspent) { return unspent.address })
           var tx = wallet.signWith(txb, addresses).build()

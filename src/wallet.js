@@ -75,9 +75,13 @@ Wallet.prototype.createTransaction = function(outputs, external, internal) {
 }
 
 Wallet.prototype.containsAddress = function(address) { return this.account.containsAddress(address) }
-Wallet.prototype.getAddress = function() { return this.account.getAddress() }
-Wallet.prototype.getAddresses = function() { return this.account.getAddresses() }
-Wallet.prototype.getChangeAddress = function() { return this.account.getChangeAddress() }
+Wallet.prototype.getAllAddresses = function() { return this.account.getAllAddresses() }
+Wallet.prototype.getChangeAddress = function() { return this.account.getInternalAddress() }
+Wallet.prototype.getReceiveAddress = function() { return this.account.getExternalAddress() }
+
+Wallet.prototype.isChangeAddress = function(address) { return this.account.isInternalAddress(address) }
+Wallet.prototype.isReceiveAddress = function(address) { return this.account.isExternalAddress(address) }
+
 Wallet.prototype.nextAddress = function() { return this.account.nextAddress() }
 
 Wallet.prototype.getBalance = function() {
