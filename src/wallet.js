@@ -1,12 +1,8 @@
 var assert = require('assert')
 
-var bitcoinjs = require('bitcoinjs-lib')
+var bitcoin = require('bitcoinjs-lib')
 var bip32utils = require('bip32-utils')
-var networks = bitcoinjs.networks
-
-var Address = bitcoinjs.Address
-var HDNode = bitcoinjs.HDNode
-var TransactionBuilder = bitcoinjs.TransactionBuilder
+var networks = bitcoin.networks
 
 var selectInputs = require('./selection')
 
@@ -18,12 +14,27 @@ function Wallet(external, internal) {
   this.unspents = []
 }
 
+Wallet.fromJSON = function(json) {
+  var external = bitcoin.HDNode.fromBase58(json.external.node)
+  var internal = bitcoin.HDNode.fromBase58(json.internal.node)
+  var wallet = new Wallet(external, internal)
+  wallet.account.external.addresses = json.external.addresses
+  wallet.account.internal.addresses = json.internal.addresses
+  wallet.account.external.map = json.external.map
+  wallet.account.internal.map = json.internal.map
+  wallet.account.external.k = json.k
+  wallet.account.internal.k = json.k
+  wallet.unspents = json.unspents
+
+  return wallet
+}
+
 Wallet.fromSeedBuffer = function(seed, network) {
   network = network || networks.bitcoin
 
   // HD first-level child derivation method should be hardened
   // See https://bitcointalk.org/index.php?topic=405179.msg4415254#msg4415254
-  var m = HDNode.fromSeedBuffer(seed, network)
+  var m = bitcoin.HDNode.fromSeedBuffer(seed, network)
   var i = m.deriveHardened(0)
   var external = i.derive(0)
   var internal = i.derive(1)
@@ -52,7 +63,7 @@ Wallet.prototype.createTransaction = function(outputs, external, internal) {
   assert(selection.fee < 0.1 * 1e8, 'Very high fee: ' + selection.fee)
 
   // build transaction
-  var txb = new TransactionBuilder()
+  var txb = new bitcoin.TransactionBuilder()
 
   inputs.forEach(function(input) {
     txb.addInput(input.txId, input.vout)
@@ -76,20 +87,12 @@ Wallet.prototype.createTransaction = function(outputs, external, internal) {
 
 Wallet.prototype.containsAddress = function(address) { return this.account.containsAddress(address) }
 Wallet.prototype.getAllAddresses = function() { return this.account.getAllAddresses() }
-Wallet.prototype.getChangeAddress = function() { return this.account.getInternalAddress() }
-Wallet.prototype.getReceiveAddress = function() { return this.account.getExternalAddress() }
-
-Wallet.prototype.isChangeAddress = function(address) { return this.account.isInternalAddress(address) }
-Wallet.prototype.isReceiveAddress = function(address) { return this.account.isExternalAddress(address) }
-
-Wallet.prototype.nextAddress = function() { return this.account.nextAddress() }
-
 Wallet.prototype.getBalance = function() {
   return this.unspents.reduce(function(accum, unspent) {
     return accum + unspent.value
   }, 0)
 }
-
+Wallet.prototype.getChangeAddress = function() { return this.account.getInternalAddress() }
 Wallet.prototype.getConfirmedBalance = function() {
   return this.unspents.filter(function(unspent) {
     return unspent.confirmations > 0
@@ -98,6 +101,10 @@ Wallet.prototype.getConfirmedBalance = function() {
     return accum + unspent.value
   }, 0)
 }
+Wallet.prototype.getReceiveAddress = function() { return this.account.getExternalAddress() }
+Wallet.prototype.isChangeAddress = function(address) { return this.account.isInternalAddress(address) }
+Wallet.prototype.isReceiveAddress = function(address) { return this.account.isExternalAddress(address) }
+Wallet.prototype.nextAddress = function() { return this.account.nextAddress() }
 
 Wallet.prototype.setUnspentOutputs = function(unspents) {
   unspents.forEach(function(unspent) {
@@ -106,7 +113,7 @@ Wallet.prototype.setUnspentOutputs = function(unspents) {
     assert.equal(typeof txId, 'string', 'Expected txId, got ' + txId)
     assert.equal(txId.length, 64, 'Expected valid txId, got ' + txId)
     assert.doesNotThrow(function() {
-      Address.fromBase58Check(unspent.address)
+      bitcoin.Address.fromBase58Check(unspent.address)
     }, 'Expected Base58 Address, got ' + unspent.address)
     assert(isFinite(unspent.confirmations), 'Expected number confirmations, got ' + unspent.confirmations)
     assert(isFinite(unspent.vout), 'Expected number vout, got ' + unspent.vout)
@@ -127,6 +134,23 @@ Wallet.prototype.signWith = function(tx, addresses, external, internal) {
   })
 
   return tx
+}
+
+Wallet.prototype.toJSON = function() {
+  return {
+    external: {
+      addresses: this.account.external.addresses,
+      map: this.account.external.map,
+      node: this.external.toBase58()
+    },
+    internal: {
+      addresses: this.account.internal.addresses,
+      map: this.account.internal.map,
+      node: this.internal.toBase58()
+    },
+    k: this.account.k,
+    unspents: this.unspents
+  }
 }
 
 module.exports = Wallet

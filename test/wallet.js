@@ -1,5 +1,5 @@
 var assert = require('assert')
-var bitcoinjs = require('bitcoinjs-lib')
+var bitcoin = require('bitcoinjs-lib')
 var sinon = require('sinon')
 
 var Wallet = require('../src/wallet')
@@ -12,7 +12,7 @@ describe('Wallet', function() {
 
     beforeEach(function() {
       var seed = new Buffer(32)
-      var m = bitcoinjs.HDNode.fromSeedBuffer(seed, bitcoinjs.networks.litecoin)
+      var m = bitcoin.HDNode.fromSeedBuffer(seed, bitcoin.networks.litecoin)
 
       external = m.derive(0).neutered()
       var internal = m.derive(1).neutered()
@@ -21,7 +21,7 @@ describe('Wallet', function() {
     })
 
     it('uses the external nodes network', function() {
-      assert.equal(external.network, bitcoinjs.networks.litecoin)
+      assert.equal(external.network, bitcoin.networks.litecoin)
     })
   })
 
@@ -34,13 +34,13 @@ describe('Wallet', function() {
     })
 
     it('defaults to Bitcoin network', function() {
-      assert.equal(wallet.network, bitcoinjs.networks.bitcoin)
+      assert.equal(wallet.network, bitcoin.networks.bitcoin)
     })
 
     it('uses the network if specified', function() {
-      wallet = Wallet.fromSeedBuffer(seed, bitcoinjs.networks.testnet)
+      wallet = Wallet.fromSeedBuffer(seed, bitcoin.networks.testnet)
 
-      assert.equal(wallet.network, bitcoinjs.networks.testnet)
+      assert.equal(wallet.network, bitcoin.networks.testnet)
     })
 
     it("generates m/0'/0 as the external chain node", function() {
@@ -61,10 +61,18 @@ describe('Wallet', function() {
       var wallet
 
       beforeEach(function() {
-        var seed = new Buffer(f.seed, 'hex')
-        var network = bitcoinjs.networks[f.network]
+        wallet = Wallet.fromJSON(f.json)
+      })
 
-        wallet = Wallet.fromSeedBuffer(seed, network)
+      describe('fromJSON', function() {
+        it('imports from a JSON object correctly', function() {
+          assert.equal(wallet.account.external.addresses, f.json.external.addresses)
+          assert.equal(wallet.account.internal.addresses, f.json.internal.addresses)
+          assert.equal(wallet.account.external.map, f.json.external.map)
+          assert.equal(wallet.account.internal.map, f.json.internal.map)
+          assert.equal(wallet.account.k, f.json.k)
+          assert.equal(wallet.unspents, f.json.unspents)
+        })
       })
 
       describe('containsAddress', function() {
@@ -78,11 +86,11 @@ describe('Wallet', function() {
         }))
 
         it('returns the expected results', function() {
-          for (var i = 2; i < f.addresses.length; i += 2) {
-            wallet.nextAddress()
-          }
+          f.json.external.addresses.forEach(function(address) {
+            assert(wallet.containsAddress(address))
+          })
 
-          f.addresses.forEach(function(address) {
+          f.json.internal.addresses.forEach(function(address) {
             assert(wallet.containsAddress(address))
           })
 
@@ -91,16 +99,8 @@ describe('Wallet', function() {
       })
 
       // TODO
-      //it('throws when value is below dust threshold', function() {
+      //it'throws when value is below dust threshold', function() {})
       describe('createTransaction', function() {
-        beforeEach(function() {
-          for (var i = 2; i < f.addresses.length; i += 2) {
-            wallet.nextAddress()
-          }
-
-          wallet.setUnspentOutputs(f.unspents)
-        })
-
         f.transactions.forEach(function(t) {
           it(t.description, function() {
             var tx = wallet.createTransaction(t.outputs, t.options)
@@ -108,12 +108,12 @@ describe('Wallet', function() {
 
             // ensure all expected inputs are found (and sum input values)
             t.expected.inputs.forEach(function(index) {
-              var unspent = f.unspents[index]
+              var unspent = f.json.unspents[index]
 
               totalInputValue += unspent.value
 
               assert(tx.ins.some(function(txIn) {
-                var txId = bitcoinjs.bufferutils.reverse(txIn.hash).toString('hex')
+                var txId = bitcoin.bufferutils.reverse(txIn.hash).toString('hex')
 
                 return unspent.txId === txId && unspent.vout === txIn.index
               }))
@@ -125,7 +125,7 @@ describe('Wallet', function() {
             // ensure all expected outputs are found
             t.outputs.forEach(function(output) {
               assert(tx.outs.some(function(txOut) {
-                var address = bitcoinjs.Address.fromOutputScript(txOut.script, wallet.network).toString()
+                var address = bitcoin.Address.fromOutputScript(txOut.script, wallet.network).toString()
 
                 return output.address === address && output.value === txOut.value
               }))
@@ -139,7 +139,7 @@ describe('Wallet', function() {
               var changeAddress = wallet.getChangeAddress()
 
               assert(tx.outs.some(function(txOut) {
-                var address = bitcoinjs.Address.fromOutputScript(txOut.script, wallet.network).toString()
+                var address = bitcoin.Address.fromOutputScript(txOut.script, wallet.network).toString()
 
                 return changeAddress === address
               }))
@@ -168,9 +168,9 @@ describe('Wallet', function() {
         }))
 
         it('returns all known addresses', function() {
-          for (var i = 2; i < f.addresses.length; i += 2) wallet.nextAddress()
+          var addresses = f.json.external.addresses.concat(f.json.internal.addresses)
 
-          assert.deepEqual(wallet.getAllAddresses(), f.addresses)
+          assert.deepEqual(wallet.getAllAddresses(), addresses)
         })
       })
 
@@ -237,7 +237,7 @@ describe('Wallet', function() {
 
       describe('getBalance', function() {
         beforeEach(function() {
-          wallet.setUnspentOutputs(f.unspents)
+          wallet.setUnspentOutputs(f.json.unspents)
         })
 
         it('sums all unspents', function() {
@@ -247,7 +247,7 @@ describe('Wallet', function() {
 
       describe('getConfirmedBalance', function() {
         beforeEach(function() {
-          wallet.setUnspentOutputs(f.unspents)
+          wallet.setUnspentOutputs(f.json.unspents)
         })
 
         it('sums confirmed unspents', function() {
@@ -257,39 +257,39 @@ describe('Wallet', function() {
 
       describe('setUnspentOutputs', function() {
         it('sets wallet.unspents correctly', function() {
-          wallet.setUnspentOutputs(f.unspents)
+          wallet.setUnspentOutputs(f.json.unspents)
 
-          assert.equal(wallet.unspents, f.unspents)
+          assert.equal(wallet.unspents, f.json.unspents)
         })
 
         // TODO: test validation
       })
 
       describe('signWith', function() {
-        beforeEach(function() {
-          for (var i = 2; i < f.addresses.length; i += 2) {
-            wallet.nextAddress()
-          }
-        })
-
         it('signs Transaction inputs with respective keys', function() {
-          var txb = new bitcoinjs.TransactionBuilder()
+          var txb = new bitcoin.TransactionBuilder()
 
-          f.unspents.forEach(function(unspent) {
+          f.json.unspents.forEach(function(unspent) {
             txb.addInput(unspent.txId, unspent.vout)
           })
 
           txb.addOutput(wallet.getReceiveAddress(), 1e5)
 
-          var addresses = f.unspents.map(function(unspent) { return unspent.address })
+          var addresses = f.json.unspents.map(function(unspent) { return unspent.address })
           var tx = wallet.signWith(txb, addresses).build()
 
           addresses.forEach(function(address, i) {
             var input = tx.ins[i]
-            var pubKey = bitcoinjs.ECPubKey.fromBuffer(input.script.chunks[1])
+            var pubKey = bitcoin.ECPubKey.fromBuffer(input.script.chunks[1])
 
             assert.equal(pubKey.getAddress(wallet.network).toString(), address)
           })
+        })
+      })
+
+      describe('toJSON', function() {
+        it('exports a JSON object correctly', function() {
+          assert.deepEqual(wallet.toJSON(), f.json)
         })
       })
     })
