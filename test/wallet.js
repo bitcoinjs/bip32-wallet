@@ -174,6 +174,16 @@ describe('Wallet', function() {
         })
       })
 
+      describe('getBalance', function() {
+        beforeEach(function() {
+          wallet.setUnspentOutputs(f.json.unspents)
+        })
+
+        it('sums all unspents', function() {
+          assert.equal(wallet.getBalance(), f.balance)
+        })
+      })
+
       describe('getChangeAddress', function() {
         it('wraps account.getChangeAddress', sinon.test(function() {
           this.mock(wallet.account).expects('getInternalAddress').once()
@@ -184,6 +194,16 @@ describe('Wallet', function() {
           wallet.nextAddress()
 
           assert.equal(wallet.getChangeAddress(), wallet.account.internal.get())
+        })
+      })
+
+      describe('getConfirmedBalance', function() {
+        beforeEach(function() {
+          wallet.setUnspentOutputs(f.json.unspents)
+        })
+
+        it('sums confirmed unspents', function() {
+          assert.equal(wallet.getConfirmedBalance(), f.confirmedBalance)
         })
       })
 
@@ -232,26 +252,6 @@ describe('Wallet', function() {
           var result = wallet.nextAddress()
 
           assert.equal(result, wallet.getReceiveAddress())
-        })
-      })
-
-      describe('getBalance', function() {
-        beforeEach(function() {
-          wallet.setUnspentOutputs(f.json.unspents)
-        })
-
-        it('sums all unspents', function() {
-          assert.equal(wallet.getBalance(), f.balance)
-        })
-      })
-
-      describe('getConfirmedBalance', function() {
-        beforeEach(function() {
-          wallet.setUnspentOutputs(f.json.unspents)
-        })
-
-        it('sums confirmed unspents', function() {
-          assert.equal(wallet.getConfirmedBalance(), f.confirmedBalance)
         })
       })
 
