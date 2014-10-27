@@ -10,7 +10,6 @@ function Wallet(external, internal) {
   this.account = new bip32utils.Account(external, internal)
   this.external = external
   this.internal = internal
-  this.network = external.network
   this.unspents = []
 }
 
@@ -45,13 +44,14 @@ Wallet.fromSeedBuffer = function(seed, network) {
 Wallet.prototype.createTransaction = function(outputs, external, internal) {
   external = external || this.external
   internal = internal || this.internal
+  var network = this.getNetwork()
 
   // filter un-confirmed
   var unspents = this.unspents.filter(function(unspent) {
     return unspent.confirmations > 0
   })
 
-  var selection = selectInputs(unspents, outputs, this.network)
+  var selection = selectInputs(unspents, outputs, network)
   var inputs = selection.inputs
 
   // sanity check (until things are battle tested)
@@ -74,7 +74,7 @@ Wallet.prototype.createTransaction = function(outputs, external, internal) {
   })
 
   // is the change worth it?
-  if (selection.change > this.network.dustThreshold) {
+  if (selection.change > network.dustThreshold) {
     var changeAddress = this.getChangeAddress()
 
     txb.addOutput(changeAddress, selection.change)
@@ -101,6 +101,7 @@ Wallet.prototype.getConfirmedBalance = function() {
     return accum + unspent.value
   }, 0)
 }
+Wallet.prototype.getNetwork = function() { return this.external.network }
 Wallet.prototype.getReceiveAddress = function() { return this.account.getExternalAddress() }
 Wallet.prototype.isChangeAddress = function(address) { return this.account.isInternalAddress(address) }
 Wallet.prototype.isReceiveAddress = function(address) { return this.account.isExternalAddress(address) }

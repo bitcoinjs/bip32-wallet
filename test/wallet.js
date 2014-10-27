@@ -7,24 +7,6 @@ var Wallet = require('../src/wallet')
 var fixtures = require('./fixtures/wallet.json')
 
 describe('Wallet', function() {
-  describe('constructor', function() {
-    var external, wallet
-
-    beforeEach(function() {
-      var seed = new Buffer(32)
-      var m = bitcoin.HDNode.fromSeedBuffer(seed, bitcoin.networks.litecoin)
-
-      external = m.derive(0).neutered()
-      var internal = m.derive(1).neutered()
-
-      wallet = new Wallet(external, internal)
-    })
-
-    it('uses the external nodes network', function() {
-      assert.equal(external.network, bitcoin.networks.litecoin)
-    })
-  })
-
   describe('fromSeedBuffer', function() {
     var seed, wallet
 
@@ -34,13 +16,13 @@ describe('Wallet', function() {
     })
 
     it('defaults to Bitcoin network', function() {
-      assert.equal(wallet.network, bitcoin.networks.bitcoin)
+      assert.equal(wallet.getNetwork(), bitcoin.networks.bitcoin)
     })
 
     it('uses the network if specified', function() {
       wallet = Wallet.fromSeedBuffer(seed, bitcoin.networks.testnet)
 
-      assert.equal(wallet.network, bitcoin.networks.testnet)
+      assert.equal(wallet.getNetwork(), bitcoin.networks.testnet)
     })
 
     it("generates m/0'/0 as the external chain node", function() {
@@ -122,10 +104,12 @@ describe('Wallet', function() {
             // ensure no other inputs exist
             assert.equal(tx.ins.length, t.expected.inputs.length)
 
+            var network = wallet.getNetwork()
+
             // ensure all expected outputs are found
             t.outputs.forEach(function(output) {
               assert(tx.outs.some(function(txOut) {
-                var address = bitcoin.Address.fromOutputScript(txOut.script, wallet.network).toString()
+                var address = bitcoin.Address.fromOutputScript(txOut.script, network).toString()
 
                 return output.address === address && output.value === txOut.value
               }))
@@ -139,7 +123,7 @@ describe('Wallet', function() {
               var changeAddress = wallet.getChangeAddress()
 
               assert(tx.outs.some(function(txOut) {
-                var address = bitcoin.Address.fromOutputScript(txOut.script, wallet.network).toString()
+                var address = bitcoin.Address.fromOutputScript(txOut.script, network).toString()
 
                 return changeAddress === address
               }))
@@ -204,6 +188,12 @@ describe('Wallet', function() {
 
         it('sums confirmed unspents', function() {
           assert.equal(wallet.getConfirmedBalance(), f.confirmedBalance)
+        })
+      })
+
+      describe('getNetwork', function() {
+        it('uses the external nodes network', function() {
+          assert.equal(wallet.getNetwork(), wallet.external.network)
         })
       })
 
@@ -277,12 +267,13 @@ describe('Wallet', function() {
 
           var addresses = f.json.unspents.map(function(unspent) { return unspent.address })
           var tx = wallet.signWith(txb, addresses).build()
+          var network = wallet.getNetwork()
 
           addresses.forEach(function(address, i) {
             var input = tx.ins[i]
             var pubKey = bitcoin.ECPubKey.fromBuffer(input.script.chunks[1])
 
-            assert.equal(pubKey.getAddress(wallet.network).toString(), address)
+            assert.equal(pubKey.getAddress(network).toString(), address)
           })
         })
       })
