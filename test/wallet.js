@@ -26,15 +26,13 @@ describe('Wallet', function() {
     })
 
     it("generates m/0'/0 as the external chain node", function() {
-      var external = wallet.account.external.hdNode
-      assert.equal(external.index, 0)
-      assert.equal(external.depth, 2)
+      assert.equal(wallet.external.index, 0)
+      assert.equal(wallet.external.depth, 2)
     })
 
     it("generates m/0'/1 as the internal chain node", function() {
-      var internal = wallet.account.internal.hdNode
-      assert.equal(internal.index, 1)
-      assert.equal(internal.depth, 2)
+      assert.equal(wallet.internal.index, 1)
+      assert.equal(wallet.internal.depth, 2)
     })
   })
 
