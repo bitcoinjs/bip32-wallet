@@ -10,14 +10,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://https://github.com/dcousens/bip32-wallet.git"
+    "url": "https://github.com/dcousens/bip32-wallet.git"
   },
   "author": "Daniel Cousens",
   "license": "MIT",
   "bugs": {
-    "url": "https://https://github.com/dcousens/bip32-wallet/issues"
+    "url": "https://github.com/dcousens/bip32-wallet/issues"
   },
-  "homepage": "https://https://github.com/dcousens/bip32-wallet",
+  "homepage": "https://github.com/dcousens/bip32-wallet",
   "devDependencies": {
     "coveralls": "^2.11.2",
     "istanbul": "^0.3.2",
