@@ -73,16 +73,32 @@ Wallet.prototype.createTransaction = function(outputs, external, internal) {
     txb.addOutput(output.address, output.value)
   })
 
+  var change, fee
+
   // is the change worth it?
   if (selection.change > network.dustThreshold) {
     var changeAddress = this.getChangeAddress()
 
     txb.addOutput(changeAddress, selection.change)
+
+    change = selection.change
+    fee = selection.fee
+
+  } else {
+    change = 0
+    fee = selection.change + selection.fee
+
   }
 
   // sign and return
   var addresses = inputs.map(function(input) { return input.address })
-  return this.signWith(txb, addresses, external, internal).build()
+  var transaction = this.signWith(txb, addresses, external, internal).build()
+
+  return {
+    fee: fee,
+    change: change,
+    transaction: transaction
+  }
 }
 
 Wallet.prototype.containsAddress = function(address) { return this.account.containsAddress(address) }

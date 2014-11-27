@@ -83,7 +83,8 @@ describe('Wallet', function() {
       describe('createTransaction', function() {
         f.transactions.forEach(function(t) {
           it(t.description, function() {
-            var tx = wallet.createTransaction(t.outputs, t.options)
+            var formed = wallet.createTransaction(t.outputs, t.options)
+            var tx = formed.transaction
             var totalInputValue = 0
 
             // ensure all expected inputs are found (and sum input values)
@@ -131,11 +132,13 @@ describe('Wallet', function() {
             var totalOutputValue = tx.outs.reduce(function(a, x) { return a + x.value }, 0)
 
             var expectedOutputValue = t.outputs.reduce(function(a, x) { return a + x.value }, 0)
-            var change = totalOutputValue - expectedOutputValue
-            var fee = totalInputValue - totalOutputValue
+            var actualChange = totalOutputValue - expectedOutputValue
+            var actualFee = totalInputValue - totalOutputValue
 
-            assert.equal(change, t.expected.change)
-            assert.equal(fee, t.expected.fee)
+            assert.equal(actualChange, formed.change)
+            assert.equal(actualChange, t.expected.change)
+            assert.equal(actualFee, formed.fee)
+            assert.equal(actualFee, t.expected.fee)
 
             // catch-all verification
             assert.equal(tx.getId(), t.expected.txId)
