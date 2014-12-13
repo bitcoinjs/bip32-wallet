@@ -117,7 +117,7 @@ Wallet.prototype.getConfirmedBalance = function() {
     return accum + unspent.value
   }, 0)
 }
-Wallet.prototype.getNetwork = function() { return this.external.network }
+Wallet.prototype.getNetwork = function() { return this.account.getNetwork() }
 Wallet.prototype.getReceiveAddress = function() { return this.account.getExternalAddress() }
 Wallet.prototype.isChangeAddress = function(address) { return this.account.isInternalAddress(address) }
 Wallet.prototype.isReceiveAddress = function(address) { return this.account.isExternalAddress(address) }

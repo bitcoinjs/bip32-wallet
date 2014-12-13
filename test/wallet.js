@@ -193,8 +193,13 @@ describe('Wallet', function() {
       })
 
       describe('getNetwork', function() {
-        it('uses the external nodes network', function() {
-          assert.equal(wallet.getNetwork(), wallet.external.network)
+        it('wraps account.getNetwork', sinon.test(function() {
+          this.mock(wallet.account).expects('getNetwork').once()
+          wallet.getNetwork()
+        }))
+
+        it('returns the accounts network', function() {
+          assert.equal(wallet.getNetwork(), wallet.account.getNetwork())
         })
       })
 
