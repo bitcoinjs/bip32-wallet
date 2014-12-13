@@ -52,8 +52,7 @@ function selectInputs(unspents, outputs, network) {
 
     candidates.push(unspent)
 
-    tx.addInput(dummy.txHash, 0)
-    tx.setInputScript(i, dummy.scriptSig)
+    tx.addInput(dummy.txHash, 0, undefined, dummy.scriptSig)
 
     accum += unspent.value
 
