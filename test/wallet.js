@@ -289,7 +289,7 @@ describe('Wallet', function() {
   })
 
   fixtures.invalid.setUnspentOutputs.forEach(function(f) {
-    describe.only('setUnspentOutputs', function() {
+    describe('setUnspentOutputs', function() {
       var wallet
 
       beforeEach(function() {
