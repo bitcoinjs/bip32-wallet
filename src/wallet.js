@@ -124,17 +124,26 @@ Wallet.prototype.isReceiveAddress = function(address) { return this.account.isEx
 Wallet.prototype.nextAddress = function() { return this.account.nextAddress() }
 
 Wallet.prototype.setUnspentOutputs = function(unspents) {
+  var seen = {}
+
   unspents.forEach(function(unspent) {
     var txId = unspent.txId
 
     assert.equal(typeof txId, 'string', 'Expected txId, got ' + txId)
     assert.equal(txId.length, 64, 'Expected valid txId, got ' + txId)
-    assert.doesNotThrow(function() {
+    try {
       bitcoin.Address.fromBase58Check(unspent.address)
-    }, 'Expected Base58 Address, got ' + unspent.address)
-    assert(isFinite(unspent.confirmations), 'Expected number confirmations, got ' + unspent.confirmations)
-    assert(isFinite(unspent.vout), 'Expected number vout, got ' + unspent.vout)
-    assert(isFinite(unspent.value), 'Expected number value, got ' + unspent.value)
+    } catch (e) {
+      throw ('Expected valid base58 Address, got ' + unspent.address)
+    }
+    assert.equal(typeof unspent.confirmations, 'number', 'Expected number confirmations, got ' + unspent.confirmations)
+    assert.equal(typeof unspent.vout, 'number', 'Expected number vout, got ' + unspent.vout)
+    assert.equal(typeof unspent.value, 'number', 'Expected number value, got ' + unspent.value)
+
+    var shortId = txId + ':' + unspent.vout
+    assert(!(shortId in seen), 'Duplicate unspent ' + shortId)
+
+    seen[shortId] = true
   })
 
   this.unspents = unspents

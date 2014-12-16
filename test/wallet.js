@@ -78,8 +78,6 @@ describe('Wallet', function() {
         })
       })
 
-      // TODO
-      //it'throws when value is below dust threshold', function() {})
       describe('createTransaction', function() {
         f.transactions.forEach(function(t) {
           it(t.description, function() {
@@ -257,8 +255,6 @@ describe('Wallet', function() {
 
           assert.equal(wallet.unspents, f.json.unspents)
         })
-
-        // TODO: test validation
       })
 
       describe('signWith', function() {
@@ -290,5 +286,26 @@ describe('Wallet', function() {
         })
       })
     })
+  })
+
+  fixtures.invalid.setUnspentOutputs.forEach(function(f) {
+    describe.only('setUnspentOutputs', function() {
+      var wallet
+
+      beforeEach(function() {
+        var seed = new Buffer(32)
+        wallet = Wallet.fromSeedBuffer(seed)
+      })
+
+      it('throws "' + f.exception + '" when necessary', function() {
+        assert.throws(function() {
+          wallet.setUnspentOutputs(f.unspents)
+        }, new RegExp(f.exception))
+      })
+    })
+
+    // TODO
+    // describe('createTransaction', function() {
+    //   it('throws when value is below dust threshold', function() {})
   })
 })
