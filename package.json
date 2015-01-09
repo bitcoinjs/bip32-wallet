@@ -20,9 +20,9 @@
   "homepage": "https://github.com/dcousens/bip32-wallet",
   "devDependencies": {
     "coveralls": "^2.11.2",
-    "istanbul": "^0.3.2",
-    "mocha": "^1.21.5",
-    "sinon": "^1.10.3"
+    "istanbul": "^0.3.5",
+    "mocha": "^2.1.0",
+    "sinon": "^1.12.2"
   },
   "dependencies": {
     "bip32-utils": "^0.3.1",
