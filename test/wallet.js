@@ -50,7 +50,6 @@ describe('Wallet', function() {
           assert.equal(wallet.account.internal.addresses, f.json.internal.addresses)
           assert.equal(wallet.account.external.map, f.json.external.map)
           assert.equal(wallet.account.internal.map, f.json.internal.map)
-          assert.equal(wallet.account.k, f.json.k)
           assert.equal(wallet.unspents, f.json.unspents)
         })
       })
@@ -174,7 +173,7 @@ describe('Wallet', function() {
         }))
 
         it('returns the current internal Address', function() {
-          wallet.nextAddress()
+          wallet.nextChangeAddress()
 
           assert.equal(wallet.getChangeAddress(), wallet.account.internal.get())
         })
@@ -208,7 +207,7 @@ describe('Wallet', function() {
         }))
 
         it('returns the current external Address', function() {
-          wallet.nextAddress()
+          wallet.nextReceiveAddress()
 
           assert.equal(wallet.getReceiveAddress(), wallet.account.external.get())
         })
@@ -236,14 +235,27 @@ describe('Wallet', function() {
         })
       })
 
-      describe('nextAddress', function() {
-        it('wraps account.nextAddress', sinon.test(function() {
-          this.mock(wallet.account).expects('nextAddress').once()
-          wallet.nextAddress()
+      describe('nextChangeAddress', function() {
+        it('wraps account.nextInternalAddress', sinon.test(function() {
+          this.mock(wallet.account).expects('nextInternalAddress').once()
+          wallet.nextChangeAddress()
         }))
 
-        it('returns the new external Address', function() {
-          var result = wallet.nextAddress()
+        it('returns the new change Address', function() {
+          var result = wallet.nextChangeAddress()
+
+          assert.equal(result, wallet.getChangeAddress())
+        })
+      })
+
+      describe('nextReceiveAddress', function() {
+        it('wraps account.nextExternalAddress', sinon.test(function() {
+          this.mock(wallet.account).expects('nextExternalAddress').once()
+          wallet.nextReceiveAddress()
+        }))
+
+        it('returns the new receive Address', function() {
+          var result = wallet.nextReceiveAddress()
 
           assert.equal(result, wallet.getReceiveAddress())
         })

@@ -21,8 +21,8 @@ Wallet.fromJSON = function(json) {
   wallet.account.internal.addresses = json.internal.addresses
   wallet.account.external.map = json.external.map
   wallet.account.internal.map = json.internal.map
-  wallet.account.external.k = json.k
-  wallet.account.internal.k = json.k
+  wallet.account.external.k = json.external.k
+  wallet.account.internal.k = json.internal.k
   wallet.unspents = json.unspents
 
   return wallet
@@ -121,7 +121,8 @@ Wallet.prototype.getNetwork = function() { return this.account.getNetwork() }
 Wallet.prototype.getReceiveAddress = function() { return this.account.getExternalAddress() }
 Wallet.prototype.isChangeAddress = function(address) { return this.account.isInternalAddress(address) }
 Wallet.prototype.isReceiveAddress = function(address) { return this.account.isExternalAddress(address) }
-Wallet.prototype.nextAddress = function() { return this.account.nextAddress() }
+Wallet.prototype.nextChangeAddress = function() { return this.account.nextInternalAddress() }
+Wallet.prototype.nextReceiveAddress = function() { return this.account.nextExternalAddress() }
 
 Wallet.prototype.setUnspentOutputs = function(unspents) {
   var seen = {}
@@ -167,14 +168,15 @@ Wallet.prototype.toJSON = function() {
     external: {
       addresses: this.account.external.addresses,
       map: this.account.external.map,
+      k: this.account.external.k,
       node: this.external.toBase58()
     },
     internal: {
       addresses: this.account.internal.addresses,
       map: this.account.internal.map,
+      k: this.account.internal.k,
       node: this.internal.toBase58()
     },
-    k: this.account.k,
     unspents: this.unspents
   }
 }

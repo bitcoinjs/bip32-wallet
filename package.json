@@ -25,7 +25,7 @@
     "sinon": "^1.12.2"
   },
   "dependencies": {
-    "bip32-utils": "^0.3.1",
+    "bip32-utils": "^0.4.0",
     "bitcoinjs-lib": "^1.4.2"
   }
 }
