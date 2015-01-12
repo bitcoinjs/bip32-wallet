@@ -1,4 +1,5 @@
 var assert = require('assert')
+var bip32utils = require('bip32-utils')
 var bitcoin = require('bitcoinjs-lib')
 var sinon = require('sinon')
 
@@ -141,6 +142,44 @@ describe('Wallet', function() {
             assert.equal(tx.getId(), t.expected.txId)
           })
         })
+      })
+
+      describe('discover', function() {
+        it('wraps bip32utils.discovery', sinon.test(function() {
+          var gapLimit = 2
+          var query = function() {}
+          var callback = function() {}
+
+          var mock = this.mock(bip32utils).expects('discovery')
+          mock.calledWithExactly(wallet.account.external, gapLimit, query, callback)
+          mock.calledWithExactly(wallet.account.internal, gapLimit, query, callback)
+          mock.twice()
+
+          wallet.discover(gapLimit, query, callback)
+          mock.callArgWith(3, null, 0, 1)
+        }))
+
+        it('accounts each retain used addresses and ONE unused address', sinon.test(function() {
+          var i = 0
+          var results = [
+            // external
+            true, true, true, false, false, false,
+
+            // internal
+            true, true, false, false
+          ]
+
+          var query = function(a, callback) {
+            i += a.length
+            return callback(null, results.slice(i - a.length, i))
+          }
+
+          wallet.discover(2, query, function(err) {
+            assert.ifError(err)
+            assert.equal(wallet.account.external.k, 3)
+            assert.equal(wallet.account.internal.k, 2)
+          })
+        }))
       })
 
       describe('getAllAddresses', function() {
