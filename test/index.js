@@ -3,7 +3,7 @@ var bip32utils = require('bip32-utils')
 var bitcoin = require('bitcoinjs-lib')
 var sinon = require('sinon')
 
-var Wallet = require('../src/wallet')
+var Wallet = require('../src/index')
 
 var fixtures = require('./fixtures/wallet.json')
 
