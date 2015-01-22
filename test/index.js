@@ -5,7 +5,7 @@ var sinon = require('sinon')
 
 var Wallet = require('../src/index')
 
-var fixtures = require('./fixtures/wallet.json')
+var fixtures = require('./fixtures/index.json')
 
 describe('Wallet', function() {
   describe('fromSeedBuffer', function() {
