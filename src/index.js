@@ -3,7 +3,7 @@ var assert = require('assert')
 var bitcoin = require('bitcoinjs-lib')
 var bip32utils = require('bip32-utils')
 var networks = bitcoin.networks
-
+var typeForce = require('typeforce')
 var selectInputs = require('./selection')
 
 function Wallet(external, internal) {
@@ -152,21 +152,25 @@ Wallet.prototype.setUnspentOutputs = function(unspents) {
   unspents.forEach(function(unspent) {
     var txId = unspent.txId
 
-    assert.equal(typeof txId, 'string', 'Expected txId, got ' + txId)
+    typeForce({
+      txId: "String",
+      confirmations: "Number",
+      address: "String",
+      value: "Number",
+      vout: "Number"
+    }, unspent)
+
     assert.equal(txId.length, 64, 'Expected valid txId, got ' + txId)
+
+    var shortId = txId + ':' + unspent.vout
+    assert(!(shortId in seen), 'Duplicate unspent ' + shortId)
+    seen[shortId] = true
+
     try {
       bitcoin.Address.fromBase58Check(unspent.address)
     } catch (e) {
       throw ('Expected valid base58 Address, got ' + unspent.address)
     }
-    assert.equal(typeof unspent.confirmations, 'number', 'Expected number confirmations, got ' + unspent.confirmations)
-    assert.equal(typeof unspent.vout, 'number', 'Expected number vout, got ' + unspent.vout)
-    assert.equal(typeof unspent.value, 'number', 'Expected number value, got ' + unspent.value)
-
-    var shortId = txId + ':' + unspent.vout
-    assert(!(shortId in seen), 'Duplicate unspent ' + shortId)
-
-    seen[shortId] = true
   })
 
   this.unspents = unspents

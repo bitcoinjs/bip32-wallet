@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "bip32-utils": "^0.4.0",
-    "bitcoinjs-lib": "^1.4.2"
+    "bitcoinjs-lib": "^1.4.2",
+    "typeforce": "^0.1.0"
   }
 }
