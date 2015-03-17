@@ -21,12 +21,12 @@
   "devDependencies": {
     "coveralls": "^2.11.2",
     "istanbul": "^0.3.5",
-    "mocha": "^2.1.0",
+    "mocha": "^2.2.0",
     "sinon": "^1.12.2"
   },
   "dependencies": {
     "bip32-utils": "^0.4.0",
-    "bitcoinjs-lib": "^1.4.2",
-    "typeforce": "^0.1.0"
+    "bitcoinjs-lib": "^1.5.0",
+    "typeforce": "^1.0.0"
   }
 }
