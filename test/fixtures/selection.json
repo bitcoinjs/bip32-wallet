@@ -2,7 +2,7 @@
   "valid": [
     {
       "description": "singular output | no change",
-      "network": "bitcoin",
+      "feePerKb": 10000,
       "outputs": [100000],
       "unspents": [30000, 110000],
       "expected": {
@@ -13,7 +13,7 @@
     },
     {
       "description": "singular output | change expected",
-      "network": "bitcoin",
+      "feePerKb": 10000,
       "outputs": [90000],
       "unspents": [30000, 110000],
       "expected": {
@@ -24,7 +24,7 @@
     },
     {
       "description": "singular output | fee > 10000 | no change",
-      "network": "bitcoin",
+      "feePerKb": 10000,
       "outputs": [60000],
       "unspents": [10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000],
       "expected": {
@@ -35,7 +35,7 @@
     },
     {
       "description": "singular output | fee > 10000 | change expected",
-      "network": "bitcoin",
+      "feePerKb": 10000,
       "outputs": [55000],
       "unspents": [10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000],
       "expected": {
@@ -46,7 +46,7 @@
     },
     {
       "description": "multiple outputs | no change",
-      "network": "bitcoin",
+      "feePerKb": 10000,
       "outputs": [35000, 5000, 5000, 1000],
       "unspents": [30000, 16000, 10000],
       "expected": {
@@ -57,7 +57,7 @@
     },
     {
       "description": "multiple outputs | change expected",
-      "network": "bitcoin",
+      "feePerKb": 10000,
       "outputs": [35000, 5000, 2000, 1000],
       "unspents": [30000, 16000, 10000],
       "expected": {
@@ -68,7 +68,7 @@
     },
     {
       "description": "no outputs | change expected",
-      "network": "bitcoin",
+      "feePerKb": 10000,
       "outputs": [],
       "unspents": [30000, 16000, 10000],
       "expected": {
@@ -81,13 +81,13 @@
   "invalid": [
     {
       "exception": "Not enough funds \\(incl\\. fee\\): 20000 < 40000",
-      "network": "bitcoin",
+      "feePerKb": 10000,
       "outputs": [40000],
       "unspents": [10000, 10000]
     },
     {
       "exception": "Not enough funds \\(incl\\. fee\\): 40000 < 50000",
-      "network": "bitcoin",
+      "feePerKb": 10000,
       "outputs": [40000],
       "unspents": [40000]
     }

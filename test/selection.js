@@ -6,17 +6,15 @@ var fixtures = require('./fixtures/selection.json')
 
 describe('selectInputs', function() {
   fixtures.valid.forEach(function(f) {
-    var network, outputs, unspents
+    var outputs, unspents
 
     beforeEach(function() {
       outputs = f.outputs.map(function(value) { return { value: value } })
       unspents = f.unspents.map(function(value) { return { value: value } })
-
-      network = bitcoinjs.networks[f.network]
     })
 
     it(f.description, function() {
-      var result = selectInputs(unspents, outputs, network)
+      var result = selectInputs(unspents, outputs, f.feePerKb)
 
       var expected = f.expected.inputs.map(function(i) {
         return unspents[i]
@@ -39,18 +37,16 @@ describe('selectInputs', function() {
   })
 
   fixtures.invalid.forEach(function(f) {
-    var network, outputs, unspents
+    var outputs, unspents
 
     beforeEach(function() {
       outputs = f.outputs.map(function(value) { return { value: value } })
       unspents = f.unspents.map(function(value) { return { value: value } })
-
-      network = bitcoinjs.networks[f.network]
     })
 
     it('throws on ' + f.exception, function() {
       assert.throws(function() {
-        selectInputs(unspents, outputs, network)
+        selectInputs(unspents, outputs, f.feePerKb)
       }, new RegExp(f.exception))
     })
   })

@@ -1,6 +1,3 @@
-var bitcoinjs = require('bitcoinjs-lib')
-var Transaction = bitcoinjs.Transaction
-
 // TODO: integrate privacy calculations, group by address, avoid linking multiple addresses together
 // XXX: There may be better optimization techniques available here, may, be.
 // TODO: integrate priority calculations
@@ -15,32 +12,26 @@ var Transaction = bitcoinjs.Transaction
 //}
 
 // XXX: these are based on pubKeyHash estimates, the information is ignored so pre-calculated placeholders are used to improve performance
-var dummy = {
-  txHash: new Buffer(32),
-  scriptPubKey: bitcoinjs.Script.fromBuffer(new Buffer(25)),
-  scriptSig: bitcoinjs.Script.fromBuffer(new Buffer(106)),
+var TX_EMPTY_SIZE = 8
+var TX_PUBKEYHASH_INPUT = 40 + 2 + 106
+var TX_PUBKEYHASH_OUTPUT = 8 + 2 + 25
+
+function estimateRelayFee(byteLength, feePerKb) {
+  return Math.ceil(byteLength / 1000) * feePerKb
 }
 
-function estimateFeeWithChange(tx, network) {
-  tx = tx.clone()
-  tx.addOutput(dummy.scriptPubKey, network.dustSoftThreshold || 0)
-
-  return network.estimateFee(tx)
-}
-
-function selectInputs(unspents, outputs, network) {
+function selectInputs(unspents, outputs, feePerKb) {
   // sort by descending value
   var sorted = [].concat(unspents).sort(function(o1, o2) {
     return o2.value - o1.value
   })
 
-  var tx = new Transaction()
+  var byteLength = TX_EMPTY_SIZE
   var targetValue = 0
 
   outputs.forEach(function(output) {
+    byteLength += TX_PUBKEYHASH_OUTPUT
     targetValue += output.value
-
-    tx.addOutput(dummy.scriptPubKey, output.value)
   })
 
   var accum = 0
@@ -52,15 +43,14 @@ function selectInputs(unspents, outputs, network) {
 
     candidates.push(unspent)
 
-    tx.addInput(dummy.txHash, 0, undefined, dummy.scriptSig)
-
+    byteLength += TX_PUBKEYHASH_INPUT
     accum += unspent.value
 
     // ignore fees until we have the minimum amount
     if (accum < targetValue) continue
 
-    var fee = network.estimateFee(tx)
-    var changeFee = estimateFeeWithChange(tx, network)
+    var fee = estimateRelayFee(byteLength, feePerKb)
+    var changeFee = estimateRelayFee(byteLength + TX_PUBKEYHASH_OUTPUT, feePerKb)
 
     total = targetValue + fee
     var changeTotal = targetValue + changeFee

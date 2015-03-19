@@ -51,7 +51,7 @@ Wallet.prototype.createTransaction = function(outputs, external, internal) {
     return unspent.confirmations > 0
   })
 
-  var selection = selectInputs(unspents, outputs, network)
+  var selection = selectInputs(unspents, outputs, network.feePerKb)
   var inputs = selection.inputs
 
   // sanity check (until things are battle tested)
