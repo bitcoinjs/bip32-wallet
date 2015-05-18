@@ -32,7 +32,7 @@
             }
           ],
           "expected": {
-            "txId": "2cae462629324342cb03d2147754fe7b05b519b08806c48f0a52e40441a8c8e8",
+            "txId": "7dc161ca3c5df67f82af7db67e6078ff4e036ce7afa53b068184f957bcc02526",
             "inputs": [
               0,
               1
@@ -54,7 +54,7 @@
             }
           ],
           "expected": {
-            "txId": "0f81b1619e83fb7260734c758212a7e30dbbadb3359fbba0fb9376ddf0eb482b",
+            "txId": "d3c0fb370702d8033315d05f176201d41d262097464ba712cd71c1bb68a26534",
             "inputs": [
               1
             ],

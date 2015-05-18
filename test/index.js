@@ -3,6 +3,7 @@
 var assert = require('assert')
 var bip32utils = require('bip32-utils')
 var bitcoin = require('bitcoinjs-lib')
+var sorted = require('is-sorted')
 var sinon = require('sinon')
 
 var Wallet = require('../src/index')
@@ -117,16 +118,23 @@ describe('Wallet', function () {
             // ensure no other outputs exist (unless change is expected)
             assert.equal(tx.outs.length, t.outputs.length + !!t.expected.change)
 
+            var txOutAddresses = tx.outs.map(function (txOut) {
+              return bitcoin.Address.fromOutputScript(txOut.script, network).toString()
+            })
+
             // enforce the change address is as expected
             if (tx.outs.length > t.outputs.length) {
               var changeAddress = wallet.getChangeAddress()
 
-              assert(tx.outs.some(function (txOut) {
-                var address = bitcoin.Address.fromOutputScript(txOut.script, network).toString()
-
+              assert(txOutAddresses.some(function (address) {
                 return changeAddress === address
               }))
             }
+
+            // validate outputs are sorted
+            assert(sorted(txOutAddresses, function (a, b) {
+              return a.localeCompare(b)
+            }))
 
             // validate total input/output values
             var totalOutputValue = tx.outs.reduce(function (a, x) { return a + x.value }, 0)

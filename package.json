@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/dcousens/bip32-wallet",
   "devDependencies": {
+    "is-sorted": "^1.0.1",
     "mocha": "*",
     "sinon": "^1.12.0",
     "standard": "*"
