@@ -1,3 +1,5 @@
+/* global beforeEach, describe, it */
+
 var assert = require('assert')
 var bip32utils = require('bip32-utils')
 var bitcoin = require('bitcoinjs-lib')
@@ -142,6 +144,8 @@ describe('Wallet', function() {
             assert.equal(tx.getId(), t.expected.txId)
           })
         })
+
+        // TODO: it('throws when value is below dust threshold', function() {})
       })
 
       describe('discover', function() {
@@ -354,9 +358,5 @@ describe('Wallet', function() {
         }, new RegExp(f.exception))
       })
     })
-
-    // TODO
-    // describe('createTransaction', function() {
-    //   it('throws when value is below dust threshold', function() {})
   })
 })
