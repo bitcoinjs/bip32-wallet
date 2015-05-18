@@ -87,8 +87,12 @@ Wallet.prototype.createTransaction = function (outputs, external, internal) {
     txb.addInput(input.txId, input.vout)
   })
 
-  // add each output
-  outputs.forEach(function (output) {
+  // sort [a copy of the] outputs uniformly, to preserve privacy
+  outputs.concat().sort(function (a, b) {
+    return a.address.localeCompare(b.address)
+
+  // then add each output
+  }).forEach(function (output) {
     txb.addOutput(output.address, output.value)
   })
 
