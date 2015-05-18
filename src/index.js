@@ -62,32 +62,35 @@ Wallet.prototype.createTransaction = function (outputs, external, internal) {
   // ensure fee isn't crazy (max 0.1 BTC)
   assert(selection.fee < 0.1 * 1e8, 'Very high fee: ' + selection.fee)
 
-  // build transaction
-  var txb = new bitcoin.TransactionBuilder()
-
-  inputs.forEach(function(input) {
-    txb.addInput(input.txId, input.vout)
-  })
-
-  outputs.forEach(function(output) {
-    txb.addOutput(output.address, output.value)
-  })
-
+  // is the change worth it?
   var change, fee
 
-  // is the change worth it?
   if (selection.change > network.dustThreshold) {
-    var changeAddress = this.getChangeAddress()
-
-    txb.addOutput(changeAddress, selection.change)
-
+    // add the change address w/o mutating
     change = selection.change
     fee = selection.fee
+    outputs = outputs.concat({
+      address: this.getChangeAddress(),
+      value: selection.change
+    })
 
   } else {
     change = 0
     fee = selection.change + selection.fee
   }
+
+  // build transaction
+  var txb = new bitcoin.TransactionBuilder()
+
+  // add each input
+  inputs.forEach(function (input) {
+    txb.addInput(input.txId, input.vout)
+  })
+
+  // add each output
+  outputs.forEach(function (output) {
+    txb.addOutput(output.address, output.value)
+  })
 
   // sign and return
   var addresses = inputs.map(function (input) { return input.address })
