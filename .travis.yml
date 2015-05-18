@@ -4,7 +4,6 @@ before_install:
 node_js:
   - "0.12"
 env:
-  - TEST_SUITE=coveralls
   - TEST_SUITE=standard
   - TEST_SUITE=unit
 script: "npm run-script $TEST_SUITE"
