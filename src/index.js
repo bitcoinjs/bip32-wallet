@@ -6,14 +6,14 @@ var networks = bitcoin.networks
 var typeForce = require('typeforce')
 var selectInputs = require('./selection')
 
-function Wallet(external, internal) {
+function Wallet (external, internal) {
   this.account = new bip32utils.Account(external, internal)
   this.external = external
   this.internal = internal
   this.unspents = []
 }
 
-Wallet.fromJSON = function(json) {
+Wallet.fromJSON = function (json) {
   var external = bitcoin.HDNode.fromBase58(json.external.node)
   var internal = bitcoin.HDNode.fromBase58(json.internal.node)
   var wallet = new Wallet(external, internal)
@@ -28,7 +28,7 @@ Wallet.fromJSON = function(json) {
   return wallet
 }
 
-Wallet.fromSeedBuffer = function(seed, network) {
+Wallet.fromSeedBuffer = function (seed, network) {
   network = network || networks.bitcoin
 
   // HD first-level child derivation method should be hardened
@@ -41,13 +41,13 @@ Wallet.fromSeedBuffer = function(seed, network) {
   return new Wallet(external, internal)
 }
 
-Wallet.prototype.createTransaction = function(outputs, external, internal) {
+Wallet.prototype.createTransaction = function (outputs, external, internal) {
   external = external || this.external
   internal = internal || this.internal
   var network = this.getNetwork()
 
   // filter un-confirmed
-  var unspents = this.unspents.filter(function(unspent) {
+  var unspents = this.unspents.filter(function (unspent) {
     return unspent.confirmations > 0
   })
 
@@ -55,8 +55,8 @@ Wallet.prototype.createTransaction = function(outputs, external, internal) {
   var inputs = selection.inputs
 
   // sanity check (until things are battle tested)
-  var totalInputValue = inputs.reduce(function(a, x) { return a + x.value }, 0)
-  var totalOutputValue = outputs.reduce(function(a, x) { return a + x.value }, 0)
+  var totalInputValue = inputs.reduce(function (a, x) { return a + x.value }, 0)
+  var totalOutputValue = outputs.reduce(function (a, x) { return a + x.value }, 0)
   assert.equal(totalInputValue - totalOutputValue, selection.change + selection.fee)
 
   // ensure fee isn't crazy (max 0.1 BTC)
@@ -87,11 +87,10 @@ Wallet.prototype.createTransaction = function(outputs, external, internal) {
   } else {
     change = 0
     fee = selection.change + selection.fee
-
   }
 
   // sign and return
-  var addresses = inputs.map(function(input) { return input.address })
+  var addresses = inputs.map(function (input) { return input.address })
   var transaction = this.signWith(txb, addresses, external, internal).build()
 
   return {
@@ -101,10 +100,10 @@ Wallet.prototype.createTransaction = function(outputs, external, internal) {
   }
 }
 
-Wallet.prototype.containsAddress = function(address) { return this.account.containsAddress(address) }
-Wallet.prototype.discover = function(gapLimit, queryCallback, done) {
-  function discoverChain(iterator, callback) {
-    bip32utils.discovery(iterator, gapLimit, queryCallback, function(err, used, checked) {
+Wallet.prototype.containsAddress = function (address) { return this.account.containsAddress(address) }
+Wallet.prototype.discover = function (gapLimit, queryCallback, done) {
+  function discoverChain (iterator, callback) {
+    bip32utils.discovery(iterator, gapLimit, queryCallback, function (err, used, checked) {
       if (err) return callback(err)
 
       // throw away ALL unused addresses AFTER the last unused address
@@ -118,46 +117,46 @@ Wallet.prototype.discover = function(gapLimit, queryCallback, done) {
   var external = this.account.external
   var internal = this.account.internal
 
-  discoverChain(external, function(err) {
+  discoverChain(external, function (err) {
     if (err) return done(err)
 
     discoverChain(internal, done)
   })
 }
-Wallet.prototype.getAllAddresses = function() { return this.account.getAllAddresses() }
-Wallet.prototype.getBalance = function() {
-  return this.unspents.reduce(function(accum, unspent) {
+Wallet.prototype.getAllAddresses = function () { return this.account.getAllAddresses() }
+Wallet.prototype.getBalance = function () {
+  return this.unspents.reduce(function (accum, unspent) {
     return accum + unspent.value
   }, 0)
 }
-Wallet.prototype.getChangeAddress = function() { return this.account.getInternalAddress() }
-Wallet.prototype.getConfirmedBalance = function() {
-  return this.unspents.filter(function(unspent) {
+Wallet.prototype.getChangeAddress = function () { return this.account.getInternalAddress() }
+Wallet.prototype.getConfirmedBalance = function () {
+  return this.unspents.filter(function (unspent) {
     return unspent.confirmations > 0
 
-  }).reduce(function(accum, unspent) {
+  }).reduce(function (accum, unspent) {
     return accum + unspent.value
   }, 0)
 }
-Wallet.prototype.getNetwork = function() { return this.account.getNetwork() }
-Wallet.prototype.getReceiveAddress = function() { return this.account.getExternalAddress() }
-Wallet.prototype.isChangeAddress = function(address) { return this.account.isInternalAddress(address) }
-Wallet.prototype.isReceiveAddress = function(address) { return this.account.isExternalAddress(address) }
-Wallet.prototype.nextChangeAddress = function() { return this.account.nextInternalAddress() }
-Wallet.prototype.nextReceiveAddress = function() { return this.account.nextExternalAddress() }
+Wallet.prototype.getNetwork = function () { return this.account.getNetwork() }
+Wallet.prototype.getReceiveAddress = function () { return this.account.getExternalAddress() }
+Wallet.prototype.isChangeAddress = function (address) { return this.account.isInternalAddress(address) }
+Wallet.prototype.isReceiveAddress = function (address) { return this.account.isExternalAddress(address) }
+Wallet.prototype.nextChangeAddress = function () { return this.account.nextInternalAddress() }
+Wallet.prototype.nextReceiveAddress = function () { return this.account.nextExternalAddress() }
 
-Wallet.prototype.setUnspentOutputs = function(unspents) {
+Wallet.prototype.setUnspentOutputs = function (unspents) {
   var seen = {}
 
-  unspents.forEach(function(unspent) {
+  unspents.forEach(function (unspent) {
     var txId = unspent.txId
 
     typeForce({
-      txId: "String",
-      confirmations: "Number",
-      address: "String",
-      value: "Number",
-      vout: "Number"
+      txId: 'String',
+      confirmations: 'Number',
+      address: 'String',
+      value: 'Number',
+      vout: 'Number'
     }, unspent)
 
     assert.equal(txId.length, 64, 'Expected valid txId, got ' + txId)
@@ -176,20 +175,20 @@ Wallet.prototype.setUnspentOutputs = function(unspents) {
   this.unspents = unspents
 }
 
-Wallet.prototype.signWith = function(tx, addresses, external, internal) {
+Wallet.prototype.signWith = function (tx, addresses, external, internal) {
   external = external || this.external
   internal = internal || this.internal
 
   var nodes = this.account.getNodes(addresses, external, internal)
 
-  nodes.forEach(function(node, i) {
+  nodes.forEach(function (node, i) {
     tx.sign(i, node.privKey)
   })
 
   return tx
 }
 
-Wallet.prototype.toJSON = function() {
+Wallet.prototype.toJSON = function () {
   return {
     external: {
       addresses: this.account.external.addresses,

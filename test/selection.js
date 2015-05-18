@@ -1,22 +1,23 @@
+/* global beforeEach, describe, it */
+
 var assert = require('assert')
-var bitcoinjs = require('bitcoinjs-lib')
 
 var selectInputs = require('../src/selection')
 var fixtures = require('./fixtures/selection.json')
 
-describe('selectInputs', function() {
-  fixtures.valid.forEach(function(f) {
+describe('selectInputs', function () {
+  fixtures.valid.forEach(function (f) {
     var outputs, unspents
 
-    beforeEach(function() {
-      outputs = f.outputs.map(function(value) { return { value: value } })
-      unspents = f.unspents.map(function(value) { return { value: value } })
+    beforeEach(function () {
+      outputs = f.outputs.map(function (value) { return { value: value } })
+      unspents = f.unspents.map(function (value) { return { value: value } })
     })
 
-    it(f.description, function() {
+    it(f.description, function () {
       var result = selectInputs(unspents, outputs, f.feePerKb)
 
-      var expected = f.expected.inputs.map(function(i) {
+      var expected = f.expected.inputs.map(function (i) {
         return unspents[i]
       })
 
@@ -27,7 +28,7 @@ describe('selectInputs', function() {
       assert.equal(result.fee, f.expected.fee, 'Invalid fee: ' + result.fee + ' !== ' + f.expected.fee)
 
       // ensure all expected inputs are found
-      expected.forEach(function(input) {
+      expected.forEach(function (input) {
         assert(result.inputs.indexOf(input) > -1)
       })
 
@@ -36,16 +37,16 @@ describe('selectInputs', function() {
     })
   })
 
-  fixtures.invalid.forEach(function(f) {
+  fixtures.invalid.forEach(function (f) {
     var outputs, unspents
 
-    beforeEach(function() {
-      outputs = f.outputs.map(function(value) { return { value: value } })
-      unspents = f.unspents.map(function(value) { return { value: value } })
+    beforeEach(function () {
+      outputs = f.outputs.map(function (value) { return { value: value } })
+      unspents = f.unspents.map(function (value) { return { value: value } })
     })
 
-    it('throws on ' + f.exception, function() {
-      assert.throws(function() {
+    it('throws on ' + f.exception, function () {
+      assert.throws(function () {
         selectInputs(unspents, outputs, f.feePerKb)
       }, new RegExp(f.exception))
     })
