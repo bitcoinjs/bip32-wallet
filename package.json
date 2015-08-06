@@ -18,15 +18,15 @@
     "url": "https://github.com/dcousens/bip32-wallet/issues"
   },
   "homepage": "https://github.com/dcousens/bip32-wallet",
+  "dependencies": {
+    "bip32-utils": "^0.4.0",
+    "bitcoinjs-lib": "^1.5.0",
+    "typeforce": "^1.0.0"
+  },
   "devDependencies": {
     "is-sorted": "^1.0.1",
     "mocha": "*",
     "sinon": "^1.12.0",
     "standard": "*"
-  },
-  "dependencies": {
-    "bip32-utils": "^0.4.0",
-    "bitcoinjs-lib": "^1.5.0",
-    "typeforce": "^1.0.0"
   }
 }
