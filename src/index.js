@@ -1,10 +1,8 @@
-var assert = require('assert')
-
-var bitcoin = require('bitcoinjs-lib')
 var bip32utils = require('bip32-utils')
+var bitcoin = require('bitcoinjs-lib')
 var networks = bitcoin.networks
-var typeForce = require('typeforce')
 var selectInputs = require('./selection')
+var typeForce = require('typeforce')
 
 function Wallet (external, internal) {
   this.account = new bip32utils.Account(external, internal)
@@ -54,15 +52,13 @@ Wallet.prototype.createTransaction = function (outputs, external, internal) {
   var selection = selectInputs(unspents, outputs, network.feePerKb)
   var inputs = selection.inputs
 
-  // sanity check (until things are battle tested)
+  // sanity checks
   var totalInputValue = inputs.reduce(function (a, x) { return a + x.value }, 0)
   var totalOutputValue = outputs.reduce(function (a, x) { return a + x.value }, 0)
-  assert.equal(totalInputValue - totalOutputValue, selection.change + selection.fee)
+  var totalUnused = selection.change + selection.fee
 
-  // ensure fee isn't crazy (max 0.1 BTC)
-  if (selection.fee > 0.1 * 1e8) {
-    throw new Error('Absurd fee: ' + selection.fee)
-  }
+  if (totalInputValue - totalOutputValue !== totalUnused) throw new Error('Unexpected change/fee, please report this')
+  if (selection.fee > 0.1 * 1e8) throw new Error('Absurd fee: ' + selection.fee)
 
   // is the change worth it?
   var change, fee
