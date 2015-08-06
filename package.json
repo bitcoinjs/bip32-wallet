@@ -21,6 +21,7 @@
   "dependencies": {
     "bip32-utils": "^0.4.0",
     "bitcoinjs-lib": "^1.5.0",
+    "fisher-yates": "^1.0.1",
     "typeforce": "^1.0.0"
   },
   "devDependencies": {
