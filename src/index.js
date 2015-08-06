@@ -60,7 +60,9 @@ Wallet.prototype.createTransaction = function (outputs, external, internal) {
   assert.equal(totalInputValue - totalOutputValue, selection.change + selection.fee)
 
   // ensure fee isn't crazy (max 0.1 BTC)
-  assert(selection.fee < 0.1 * 1e8, 'Very high fee: ' + selection.fee)
+  if (selection.fee > 0.1 * 1e8) {
+    throw new Error('Absurd fee: ' + selection.fee)
+  }
 
   // is the change worth it?
   var change, fee
@@ -166,10 +168,15 @@ Wallet.prototype.setUnspentOutputs = function (unspents) {
       vout: 'Number'
     }, unspent)
 
-    assert.equal(txId.length, 64, 'Expected valid txId, got ' + txId)
+    if (txId.length !== 64) {
+      throw new TypeError('Expected valid txId, got ' + txId)
+    }
 
     var shortId = txId + ':' + unspent.vout
-    assert(!(shortId in seen), 'Duplicate unspent ' + shortId)
+    if (seen[shortId]) {
+      throw new Error('Duplicate unspent ' + shortId)
+    }
+
     seen[shortId] = true
 
     try {
