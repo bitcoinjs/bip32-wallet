@@ -178,7 +178,7 @@ Wallet.prototype.setUnspentOutputs = function (unspents) {
     try {
       bitcoin.Address.fromBase58Check(unspent.address)
     } catch (e) {
-      throw ('Expected valid base58 Address, got ' + unspent.address)
+      throw new Error('Expected valid base58 Address, got ' + unspent.address)
     }
   })
 
