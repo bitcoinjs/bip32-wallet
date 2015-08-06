@@ -21,8 +21,8 @@ describe('selectInputs', function () {
         return unspents[i]
       })
 
-      // ensure change is correctly calculated
-      assert.equal(result.change, f.expected.change, 'Invalid change: ' + result.change + ' !== ' + f.expected.change)
+      // ensure remainder is correctly calculated
+      assert.equal(result.remainder, f.expected.remainder, 'Invalid remainder: ' + result.remainder + ' !== ' + f.expected.remainder)
 
       // ensure fee is correctly calculated
       assert.equal(result.fee, f.expected.fee, 'Invalid fee: ' + result.fee + ' !== ' + f.expected.fee)

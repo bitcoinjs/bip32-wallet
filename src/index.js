@@ -55,7 +55,7 @@ Wallet.prototype.createTransaction = function (outputs, external, internal) {
   // sanity checks
   var totalInputValue = inputs.reduce(function (a, x) { return a + x.value }, 0)
   var totalOutputValue = outputs.reduce(function (a, x) { return a + x.value }, 0)
-  var totalUnused = selection.change + selection.fee
+  var totalUnused = selection.remainder + selection.fee
 
   if (totalInputValue - totalOutputValue !== totalUnused) throw new Error('Unexpected change/fee, please report this')
   if (selection.fee > 0.1 * 1e8) throw new Error('Absurd fee: ' + selection.fee)
@@ -63,18 +63,18 @@ Wallet.prototype.createTransaction = function (outputs, external, internal) {
   // is the change worth it?
   var change, fee
 
-  if (selection.change > network.dustThreshold) {
+  if (selection.remainder > network.dustThreshold) {
     // add the change address w/o mutating
-    change = selection.change
+    change = selection.remainder
     fee = selection.fee
     outputs = outputs.concat({
       address: this.getChangeAddress(),
-      value: selection.change
+      value: selection.remainder
     })
 
   } else {
     change = 0
-    fee = selection.change + selection.fee
+    fee = selection.remainder + selection.fee
   }
 
   // build transaction

@@ -1,80 +1,80 @@
 {
   "valid": [
     {
-      "description": "singular output | no change",
+      "description": "singular output | no remainder",
       "feePerKb": 10000,
       "outputs": [100000],
       "unspents": [30000, 110000],
       "expected": {
-        "inputs": [1],
         "fee": 10000,
-        "change": 0
+        "inputs": [1],
+        "remainder": 0
       }
     },
     {
-      "description": "singular output | change expected",
+      "description": "singular output | remainder expected",
       "feePerKb": 10000,
       "outputs": [90000],
       "unspents": [30000, 110000],
       "expected": {
-        "inputs": [1],
         "fee": 10000,
-        "change": 10000
+        "inputs": [1],
+        "remainder": 10000
       }
     },
     {
-      "description": "singular output | fee > 10000 | no change",
+      "description": "singular output | fee > 10000 | no remainder",
       "feePerKb": 10000,
       "outputs": [60000],
       "unspents": [10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000],
       "expected": {
-        "inputs": [0, 1, 2, 3, 4, 5, 6, 7],
         "fee": 20000,
-        "change": 0
+        "inputs": [0, 1, 2, 3, 4, 5, 6, 7],
+        "remainder": 0
       }
     },
     {
-      "description": "singular output | fee > 10000 | change expected",
+      "description": "singular output | fee > 10000 | remainder expected",
       "feePerKb": 10000,
       "outputs": [55000],
       "unspents": [10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000],
       "expected": {
-        "inputs": [0, 1, 2, 3, 4, 5, 6, 7],
         "fee": 20000,
-        "change": 5000
+        "inputs": [0, 1, 2, 3, 4, 5, 6, 7],
+        "remainder": 5000
       }
     },
     {
-      "description": "multiple outputs | no change",
+      "description": "multiple outputs | no remainder",
       "feePerKb": 10000,
       "outputs": [35000, 5000, 5000, 1000],
       "unspents": [30000, 16000, 10000],
       "expected": {
-        "inputs": [0, 1, 2],
         "fee": 10000,
-        "change": 0
+        "inputs": [0, 1, 2],
+        "remainder": 0
       }
     },
     {
-      "description": "multiple outputs | change expected",
+      "description": "multiple outputs | remainder expected",
       "feePerKb": 10000,
       "outputs": [35000, 5000, 2000, 1000],
       "unspents": [30000, 16000, 10000],
       "expected": {
-        "inputs": [0, 1, 2],
         "fee": 10000,
-        "change": 3000
+        "inputs": [0, 1, 2],
+        "remainder": 3000
       }
     },
     {
-      "description": "no outputs | change expected",
+      "description": "no outputs | remainder expected",
       "feePerKb": 10000,
       "outputs": [],
       "unspents": [30000, 16000, 10000],
       "expected": {
-        "inputs": [0],
         "fee": 10000,
-        "change": 20000
+        "inputs": [0],
+        "remainder": 20000
       }
     }
   ],

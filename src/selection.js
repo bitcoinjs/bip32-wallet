@@ -50,28 +50,28 @@ function selectInputs (unspents, outputs, feePerKb) {
     if (accum < targetValue) continue
 
     var fee = estimateRelayFee(byteLength, feePerKb)
-    var changeFee = estimateRelayFee(byteLength + TX_PUBKEYHASH_OUTPUT, feePerKb)
+    var feeWithChange = estimateRelayFee(byteLength + TX_PUBKEYHASH_OUTPUT, feePerKb)
 
     total = targetValue + fee
-    var changeTotal = targetValue + changeFee
+    var totalWithChange = targetValue + feeWithChange
 
-    // do we have enough for a change output
-    if (accum >= changeTotal) {
-      var change = accum - changeTotal
+    // do we have enough for the fee and change?
+    if (accum >= totalWithChange) {
+      var remainder = accum - totalWithChange
 
       return {
-        change: change,
-        fee: changeFee,
-        inputs: candidates
+        fee: feeWithChange,
+        inputs: candidates,
+        remainder: remainder
       }
     }
 
-    // no? what about without the change output
+    // do we have enough for the fee?
     if (accum >= total) {
       return {
-        change: 0,
         fee: fee,
-        inputs: candidates
+        inputs: candidates,
+        remainder: 0
       }
     }
   }
