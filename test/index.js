@@ -3,7 +3,6 @@
 var assert = require('assert')
 var bip32utils = require('bip32-utils')
 var bitcoin = require('bitcoinjs-lib')
-var sorted = require('is-sorted')
 var sinon = require('sinon')
 
 var Wallet = require('../src/index')
@@ -130,11 +129,6 @@ describe('Wallet', function () {
                 return changeAddress === address
               }))
             }
-
-            // validate outputs are sorted
-            assert(sorted(txOutAddresses, function (a, b) {
-              return a.localeCompare(b)
-            }))
 
             // validate total input/output values
             var totalOutputValue = tx.outs.reduce(function (a, x) { return a + x.value }, 0)

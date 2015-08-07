@@ -1,8 +1,8 @@
 var bip32utils = require('bip32-utils')
+var bip69 = require('bip69')
 var bitcoin = require('bitcoinjs-lib')
 var networks = bitcoin.networks
 var selectInputs = require('./selection')
-var shuffle = require('fisher-yates')
 var typeForce = require('typeforce')
 
 function Wallet (external, internal) {
@@ -82,9 +82,10 @@ Wallet.prototype.createTransaction = function (outputs, external, internal) {
   // build transaction
   var txb = new bitcoin.TransactionBuilder()
 
-  // shuffle inputs/outputs for privacy
-  inputs = shuffle(inputs)
-  outputs = shuffle(outputs)
+  // apply BIP69 for improved privacy
+  var sorted = bip69(inputs, outputs)
+  inputs = sorted.inputs
+  outputs = sorted.outputs
 
   // add the inputs/outputs
   inputs.forEach(function (input) {
