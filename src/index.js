@@ -3,7 +3,7 @@ var bip69 = require('bip69')
 var bitcoin = require('bitcoinjs-lib')
 var networks = bitcoin.networks
 var selectInputs = require('./selection')
-var typeForce = require('typeforce')
+var typeforce = require('typeforce')
 
 function Wallet (external, internal) {
   this.account = new bip32utils.Account(external, internal)
@@ -151,36 +151,28 @@ Wallet.prototype.isReceiveAddress = function (address) { return this.account.isE
 Wallet.prototype.nextChangeAddress = function () { return this.account.nextInternalAddress() }
 Wallet.prototype.nextReceiveAddress = function () { return this.account.nextExternalAddress() }
 
+function Address (value) { return bitcoin.Address.fromBase58Check(value) }
+function HexString256bit (value) { return /^[a-f0-9]{64}$/i.test(value) }
+
+var UNSPENT_TYPE = typeforce.compile({
+  address: Address,
+  confirmations: 'Number',
+  txId: HexString256bit,
+  value: 'Number',
+  vout: 'Number'
+})
+
+Wallet.prototype.getUnspentOutputs = function (unspents) { return this.unspents }
 Wallet.prototype.setUnspentOutputs = function (unspents) {
   var seen = {}
 
   unspents.forEach(function (unspent) {
-    var txId = unspent.txId
+    typeforce(UNSPENT_TYPE, unspent)
 
-    typeForce({
-      txId: 'String',
-      confirmations: 'Number',
-      address: 'String',
-      value: 'Number',
-      vout: 'Number'
-    }, unspent)
-
-    if (txId.length !== 64) {
-      throw new TypeError('Expected valid txId, got ' + txId)
-    }
-
-    var shortId = txId + ':' + unspent.vout
-    if (seen[shortId]) {
-      throw new Error('Duplicate unspent ' + shortId)
-    }
+    var shortId = unspent.txId + ':' + unspent.vout
+    if (seen[shortId]) throw new Error('Duplicate unspent ' + shortId)
 
     seen[shortId] = true
-
-    try {
-      bitcoin.Address.fromBase58Check(unspent.address)
-    } catch (e) {
-      throw new Error('Expected valid base58 Address, got ' + unspent.address)
-    }
   })
 
   this.unspents = unspents

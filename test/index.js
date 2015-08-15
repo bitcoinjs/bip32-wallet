@@ -359,15 +359,15 @@ describe('Wallet', function () {
     })
   })
 
-  fixtures.invalid.setUnspentOutputs.forEach(function (f) {
-    describe('setUnspentOutputs', function () {
-      var wallet
+  describe('setUnspentOutputs', function () {
+    var wallet
 
-      beforeEach(function () {
-        var seed = new Buffer(32)
-        wallet = Wallet.fromSeedBuffer(seed)
-      })
+    beforeEach(function () {
+      var seed = new Buffer(32)
+      wallet = Wallet.fromSeedBuffer(seed)
+    })
 
+    fixtures.invalid.setUnspentOutputs.forEach(function (f) {
       it('throws "' + f.exception + '" when necessary', function () {
         assert.throws(function () {
           wallet.setUnspentOutputs(f.unspents)

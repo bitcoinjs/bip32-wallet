@@ -239,7 +239,7 @@
         ]
       },
       {
-        "exception": "Expected property \"txId\" of type String, got null",
+        "exception": "Expected property \"txId\" of type HexString256bit, got null",
         "unspents": [
           {
             "txId": null,
@@ -284,10 +284,10 @@
         ]
       },
       {
-        "exception": "Expected valid txId, got XXXX",
+        "exception": "Expected property \"txId\" of type HexString256bit, got String \"notahexstring\"",
         "unspents": [
           {
-            "txId": "XXXX",
+            "txId": "notahexstring",
             "address": "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa",
             "confirmations": 0,
             "value": 1,
@@ -296,11 +296,11 @@
         ]
       },
       {
-        "exception": "Expected valid base58 Address, got XXXXXX",
+        "exception": "Expected property \"address\" of type Address, got String \"fizzbuzz\"",
         "unspents": [
           {
             "txId": "839691f0e681fbfc5f7a3812b616027d6fd74f17540b33cdb78d6e7711c0f6e7",
-            "address": "XXXXXX",
+            "address": "fizzbuzz",
             "confirmations": 0,
             "value": 1,
             "vout": 0
