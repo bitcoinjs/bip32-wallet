@@ -14,7 +14,7 @@ describe('Wallet', function () {
   var seed, wallet
 
   beforeEach(function () {
-    seed = new Buffer(32)
+    seed = new Buffer('the quick brown fox jumped over the lazy dog')
     wallet = Wallet.fromSeedBuffer(seed)
   })
 
@@ -40,17 +40,6 @@ describe('Wallet', function () {
     })
   })
 
-  describe('containsAddress', function () {
-    it('wraps account.containsAddress', sinon.test(function () {
-      var address = wallet.getReceiveAddress()
-
-      this.mock(wallet.account).expects('containsAddress')
-        .once().calledWith(address)
-
-      wallet.containsAddress(address)
-    }))
-  })
-
   describe('discover', function () {
     it('wraps bip32utils.discovery', sinon.test(function () {
       var gapLimit = 2
@@ -67,15 +56,16 @@ describe('Wallet', function () {
     }))
   })
 
-  function wrapsBIP32 (functionName, bip32FunctionName) {
+  function wrapsBIP32 (functionName, bip32FunctionName, arg) {
     bip32FunctionName = bip32FunctionName || functionName
 
     it('wraps account.' + functionName, sinon.test(function () {
-      this.mock(wallet.account).expects(bip32FunctionName).once()
+      this.mock(wallet.account).expects(bip32FunctionName).once().calledWith(arg)
       wallet[functionName]()
     }))
   }
 
+  describe('containsAddress', function () { wrapsBIP32('containsAddress', '', '18jE3HtebKou19ua6UqEMx6ZaoKmguoyjR') })
   describe('getAllAddresses', function () { wrapsBIP32('getAllAddresses') })
   describe('getChangeAddress', function () { wrapsBIP32('getChangeAddress', 'getInternalAddress') })
   describe('getNetwork', function () { wrapsBIP32('getNetwork') })
