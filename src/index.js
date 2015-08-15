@@ -1,4 +1,5 @@
 var bip32utils = require('bip32-utils')
+var bip69 = require('bip69')
 var bitcoin = require('bitcoinjs-lib')
 var networks = bitcoin.networks
 var selectInputs = require('./selection')
@@ -50,47 +51,47 @@ Wallet.prototype.createTransaction = function (outputs, external, internal) {
   })
 
   var selection = selectInputs(unspents, outputs, network.feePerKb)
+  var remainder = selection.remainder
+  var fee = selection.fee
   var inputs = selection.inputs
 
   // sanity checks
   var totalInputValue = inputs.reduce(function (a, x) { return a + x.value }, 0)
   var totalOutputValue = outputs.reduce(function (a, x) { return a + x.value }, 0)
-  var totalUnused = selection.remainder + selection.fee
+  var totalUnused = remainder + fee
 
   if (totalInputValue - totalOutputValue !== totalUnused) throw new Error('Unexpected change/fee, please report this')
   if (selection.fee > 0.1 * 1e8) throw new Error('Absurd fee: ' + selection.fee)
 
-  // is the change worth it?
-  var change, fee
+  // take a copy of the outputs
+  outputs = outputs.concat()
 
-  if (selection.remainder > network.dustThreshold) {
-    // add the change address w/o mutating
-    change = selection.remainder
-    fee = selection.fee
-    outputs = outputs.concat({
+  // is the remainder non-dust?
+  if (remainder > network.dustThreshold) {
+    outputs.push({
       address: this.getChangeAddress(),
-      value: selection.remainder
+      value: remainder
     })
 
+  // ignore the remainder, combine with the fee
   } else {
-    change = 0
-    fee = selection.remainder + selection.fee
+    fee = fee + remainder
+    remainder = 0
   }
 
   // build transaction
   var txb = new bitcoin.TransactionBuilder()
 
-  // add each input
+  // apply BIP69 for improved privacy
+  inputs = bip69.sortInputs(inputs)
+  outputs = bip69.sortOutputs(outputs)
+
+  // add the inputs/outputs
   inputs.forEach(function (input) {
     txb.addInput(input.txId, input.vout)
   })
 
-  // sort [a copy of the] outputs uniformly, to preserve privacy
-  outputs.concat().sort(function (a, b) {
-    return a.address.localeCompare(b.address)
-
-  // then add each output
-  }).forEach(function (output) {
+  outputs.forEach(function (output) {
     txb.addOutput(output.address, output.value)
   })
 
@@ -99,8 +100,8 @@ Wallet.prototype.createTransaction = function (outputs, external, internal) {
   var transaction = this.signWith(txb, addresses, external, internal).build()
 
   return {
+    change: remainder,
     fee: fee,
-    change: change,
     transaction: transaction
   }
 }

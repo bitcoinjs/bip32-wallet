@@ -1,9 +1,9 @@
 /* global beforeEach, describe, it */
 
 var assert = require('assert')
+var bip69 = require('bip69')
 var bip32utils = require('bip32-utils')
 var bitcoin = require('bitcoinjs-lib')
-var sorted = require('is-sorted')
 var sinon = require('sinon')
 
 var Wallet = require('../src/index')
@@ -131,10 +131,18 @@ describe('Wallet', function () {
               }))
             }
 
-            // validate outputs are sorted
-            assert(sorted(txOutAddresses, function (a, b) {
-              return a.localeCompare(b)
-            }))
+            // validate BIP69 is in effect
+            var inputs = tx.ins.map(function (input) {
+              var txId = bitcoin.bufferutils.reverse(input.hash).toString('hex')
+
+              return {
+                txId: txId,
+                vout: input.vout
+              }
+            })
+
+            assert.deepEqual(inputs, bip69.sortInputs(inputs))
+            assert.deepEqual(tx.outs, bip69.sortOutputs(tx.outs))
 
             // validate total input/output values
             var totalOutputValue = tx.outs.reduce(function (a, x) { return a + x.value }, 0)
