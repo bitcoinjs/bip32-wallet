@@ -11,14 +11,14 @@ var Wallet = require('../src/index')
 var fixtures = require('./fixtures/index.json')
 
 describe('Wallet', function () {
+  var seed, wallet
+
+  beforeEach(function () {
+    seed = new Buffer(32)
+    wallet = Wallet.fromSeedBuffer(seed)
+  })
+
   describe('fromSeedBuffer', function () {
-    var seed, wallet
-
-    beforeEach(function () {
-      seed = new Buffer(32)
-      wallet = Wallet.fromSeedBuffer(seed)
-    })
-
     it('defaults to Bitcoin network', function () {
       assert.equal(wallet.getNetwork(), bitcoin.networks.bitcoin)
     })
@@ -40,8 +40,72 @@ describe('Wallet', function () {
     })
   })
 
+  describe('containsAddress', function () {
+    it('wraps account.containsAddress', sinon.test(function () {
+      var address = wallet.getReceiveAddress()
+
+      this.mock(wallet.account).expects('containsAddress')
+        .once().calledWith(address)
+
+      wallet.containsAddress(address)
+    }))
+  })
+
+  describe('discover', function () {
+    it('wraps bip32utils.discovery', sinon.test(function () {
+      var gapLimit = 2
+      var query = function () {}
+      var callback = function () {}
+
+      var mock = this.mock(bip32utils).expects('discovery')
+      mock.calledWithExactly(wallet.account.external, gapLimit, query, callback)
+      mock.calledWithExactly(wallet.account.internal, gapLimit, query, callback)
+      mock.twice()
+
+      wallet.discover(gapLimit, query, callback)
+      mock.callArgWith(3, null, 0, 1)
+    }))
+  })
+
+  function wrapsBIP32 (functionName, bip32FunctionName) {
+    bip32FunctionName = bip32FunctionName || functionName
+
+    it('wraps account.' + functionName, sinon.test(function () {
+      this.mock(wallet.account).expects(bip32FunctionName).once()
+      wallet[functionName]()
+    }))
+  }
+
+  describe('getAllAddresses', function () { wrapsBIP32('getAllAddresses') })
+  describe('getChangeAddress', function () { wrapsBIP32('getChangeAddress', 'getInternalAddress') })
+  describe('getNetwork', function () { wrapsBIP32('getNetwork') })
+  describe('getReceiveAddress', function () { wrapsBIP32('getReceiveAddress', 'getExternalAddress') })
+  describe('isChangeAddress', function () { wrapsBIP32('isChangeAddress', 'isInternalAddress') })
+  describe('isReceiveAddress', function () { wrapsBIP32('isReceiveAddress', 'isExternalAddress') })
+  describe('nextChangeAddress', function () { wrapsBIP32('nextChangeAddress', 'nextInternalAddress') })
+  describe('nextReceiveAddress', function () { wrapsBIP32('nextReceiveAddress', 'nextExternalAddress') })
+
+  describe('setUnspentOutputs', function () {
+    var wallet
+
+    beforeEach(function () {
+      var seed = new Buffer(32)
+      wallet = Wallet.fromSeedBuffer(seed)
+    })
+
+    fixtures.invalid.setUnspentOutputs.forEach(function (f) {
+      it('throws "' + f.exception + '" when necessary', function () {
+        assert.throws(function () {
+          wallet.setUnspentOutputs(f.unspents)
+        }, new RegExp(f.exception))
+      })
+    })
+  })
+})
+
+describe('Wallet fixtures', function () {
   fixtures.valid.forEach(function (f, i) {
-    describe('Test fixture ' + i, function () {
+    describe('Fixture ' + i, function () {
       var wallet
 
       beforeEach(function () {
@@ -59,15 +123,6 @@ describe('Wallet', function () {
       })
 
       describe('containsAddress', function () {
-        it('wraps account.containsAddress', sinon.test(function () {
-          var address = wallet.getReceiveAddress()
-
-          this.mock(wallet.account).expects('containsAddress')
-            .once().calledWith(address)
-
-          wallet.containsAddress(address)
-        }))
-
         it('returns the expected results', function () {
           f.json.external.addresses.forEach(function (address) {
             assert(wallet.containsAddress(address))
@@ -165,20 +220,6 @@ describe('Wallet', function () {
       })
 
       describe('discover', function () {
-        it('wraps bip32utils.discovery', sinon.test(function () {
-          var gapLimit = 2
-          var query = function () {}
-          var callback = function () {}
-
-          var mock = this.mock(bip32utils).expects('discovery')
-          mock.calledWithExactly(wallet.account.external, gapLimit, query, callback)
-          mock.calledWithExactly(wallet.account.internal, gapLimit, query, callback)
-          mock.twice()
-
-          wallet.discover(gapLimit, query, callback)
-          mock.callArgWith(3, null, 0, 1)
-        }))
-
         it('accounts each retain used addresses and ONE unused address', sinon.test(function () {
           var i = 0
           var results = [
@@ -203,11 +244,6 @@ describe('Wallet', function () {
       })
 
       describe('getAllAddresses', function () {
-        it('wraps account.getAllAddresses', sinon.test(function () {
-          this.mock(wallet.account).expects('getAllAddresses').once()
-          wallet.getAllAddresses()
-        }))
-
         it('returns all known addresses', function () {
           var addresses = f.json.external.addresses.concat(f.json.internal.addresses)
 
@@ -226,11 +262,6 @@ describe('Wallet', function () {
       })
 
       describe('getChangeAddress', function () {
-        it('wraps account.getChangeAddress', sinon.test(function () {
-          this.mock(wallet.account).expects('getInternalAddress').once()
-          wallet.getChangeAddress()
-        }))
-
         it('returns the current internal Address', function () {
           wallet.nextChangeAddress()
 
@@ -249,22 +280,12 @@ describe('Wallet', function () {
       })
 
       describe('getNetwork', function () {
-        it('wraps account.getNetwork', sinon.test(function () {
-          this.mock(wallet.account).expects('getNetwork').once()
-          wallet.getNetwork()
-        }))
-
         it('returns the accounts network', function () {
           assert.equal(wallet.getNetwork(), wallet.account.getNetwork())
         })
       })
 
       describe('getReceiveAddress', function () {
-        it('wraps account.getExternalAddress', sinon.test(function () {
-          this.mock(wallet.account).expects('getExternalAddress').once()
-          wallet.getReceiveAddress()
-        }))
-
         it('returns the current external Address', function () {
           wallet.nextReceiveAddress()
 
@@ -273,33 +294,18 @@ describe('Wallet', function () {
       })
 
       describe('isReceiveAddress', function () {
-        it('wraps account.isExternalAddress', sinon.test(function () {
-          this.mock(wallet.account).expects('isExternalAddress').once()
-          wallet.isReceiveAddress()
-        }))
-
         it('returns true for a valid receive address', function () {
           assert(wallet.isReceiveAddress(wallet.getReceiveAddress()))
         })
       })
 
       describe('isChangeAddress', function () {
-        it('wraps account.isInternalAddress', sinon.test(function () {
-          this.mock(wallet.account).expects('isInternalAddress').once()
-          wallet.isChangeAddress()
-        }))
-
         it('returns true for a valid change address', function () {
           assert(wallet.isChangeAddress(wallet.getChangeAddress()))
         })
       })
 
       describe('nextChangeAddress', function () {
-        it('wraps account.nextInternalAddress', sinon.test(function () {
-          this.mock(wallet.account).expects('nextInternalAddress').once()
-          wallet.nextChangeAddress()
-        }))
-
         it('returns the new change Address', function () {
           var result = wallet.nextChangeAddress()
 
@@ -308,11 +314,6 @@ describe('Wallet', function () {
       })
 
       describe('nextReceiveAddress', function () {
-        it('wraps account.nextExternalAddress', sinon.test(function () {
-          this.mock(wallet.account).expects('nextExternalAddress').once()
-          wallet.nextReceiveAddress()
-        }))
-
         it('returns the new receive Address', function () {
           var result = wallet.nextReceiveAddress()
 
@@ -355,23 +356,6 @@ describe('Wallet', function () {
         it('exports a JSON object correctly', function () {
           assert.deepEqual(wallet.toJSON(), f.json)
         })
-      })
-    })
-  })
-
-  describe('setUnspentOutputs', function () {
-    var wallet
-
-    beforeEach(function () {
-      var seed = new Buffer(32)
-      wallet = Wallet.fromSeedBuffer(seed)
-    })
-
-    fixtures.invalid.setUnspentOutputs.forEach(function (f) {
-      it('throws "' + f.exception + '" when necessary', function () {
-        assert.throws(function () {
-          wallet.setUnspentOutputs(f.unspents)
-        }, new RegExp(f.exception))
       })
     })
   })
