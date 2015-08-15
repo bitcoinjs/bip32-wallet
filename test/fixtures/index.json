@@ -224,86 +224,11 @@
         "unspents": [
           {
             "txId": "839691f0e681fbfc5f7a3812b616027d6fd74f17540b33cdb78d6e7711c0f6e7",
-            "address": "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa",
-            "confirmations": 3,
-            "vout": 4,
-            "value": 25000
+            "vout": 4
           },
           {
             "txId": "839691f0e681fbfc5f7a3812b616027d6fd74f17540b33cdb78d6e7711c0f6e7",
-            "address": "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa",
-            "confirmations": 3,
-            "vout": 4,
-            "value": 25000
-          }
-        ]
-      },
-      {
-        "exception": "Expected property \"txId\" of type HexString256bit, got null",
-        "unspents": [
-          {
-            "txId": null,
-            "address": "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa",
-            "confirmations": 0,
-            "value": 1,
-            "vout": 0
-          }
-        ]
-      },
-      {
-        "exception": "Expected property \"confirmations\" of type Number, got String \"foo\"",
-        "unspents": [
-          {
-            "txId": "839691f0e681fbfc5f7a3812b616027d6fd74f17540b33cdb78d6e7711c0f6e7",
-            "address": "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa",
-            "confirmations": "foo"
-          }
-        ]
-      },
-      {
-        "exception": "Expected property \"value\" of type Number, got String \"foo\"",
-        "unspents": [
-          {
-            "txId": "839691f0e681fbfc5f7a3812b616027d6fd74f17540b33cdb78d6e7711c0f6e7",
-            "address": "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa",
-            "confirmations": 1,
-            "value": "foo"
-          }
-        ]
-      },
-      {
-        "exception": "Expected property \"vout\" of type Number, got String \"foo\"",
-        "unspents": [
-          {
-            "txId": "839691f0e681fbfc5f7a3812b616027d6fd74f17540b33cdb78d6e7711c0f6e7",
-            "address": "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa",
-            "confirmations": 1,
-            "value": 1,
-            "vout": "foo"
-          }
-        ]
-      },
-      {
-        "exception": "Expected property \"txId\" of type HexString256bit, got String \"notahexstring\"",
-        "unspents": [
-          {
-            "txId": "notahexstring",
-            "address": "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa",
-            "confirmations": 0,
-            "value": 1,
-            "vout": 0
-          }
-        ]
-      },
-      {
-        "exception": "Expected property \"address\" of type Address, got String \"fizzbuzz\"",
-        "unspents": [
-          {
-            "txId": "839691f0e681fbfc5f7a3812b616027d6fd74f17540b33cdb78d6e7711c0f6e7",
-            "address": "fizzbuzz",
-            "confirmations": 0,
-            "value": 1,
-            "vout": 0
+            "vout": 4
           }
         ]
       }
