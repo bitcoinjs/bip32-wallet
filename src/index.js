@@ -83,9 +83,8 @@ Wallet.prototype.createTransaction = function (outputs, external, internal) {
   var txb = new bitcoin.TransactionBuilder()
 
   // apply BIP69 for improved privacy
-  var sorted = bip69(inputs, outputs)
-  inputs = sorted.inputs
-  outputs = sorted.outputs
+  inputs = bip69.sortInputs(inputs)
+  outputs = bip69.sortOutputs(outputs)
 
   // add the inputs/outputs
   inputs.forEach(function (input) {
