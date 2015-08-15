@@ -239,7 +239,7 @@
         ]
       },
       {
-        "exception": "Expected property \"txId\" of type \"String\", got null",
+        "exception": "Expected property \"txId\" of type String, got null",
         "unspents": [
           {
             "txId": null,
@@ -251,7 +251,7 @@
         ]
       },
       {
-        "exception": "Expected property \"confirmations\" of type \"Number\", got String \"foo\"",
+        "exception": "Expected property \"confirmations\" of type Number, got String \"foo\"",
         "unspents": [
           {
             "txId": "839691f0e681fbfc5f7a3812b616027d6fd74f17540b33cdb78d6e7711c0f6e7",
@@ -261,7 +261,7 @@
         ]
       },
       {
-        "exception": "Expected property \"value\" of type \"Number\", got String \"foo\"",
+        "exception": "Expected property \"value\" of type Number, got String \"foo\"",
         "unspents": [
           {
             "txId": "839691f0e681fbfc5f7a3812b616027d6fd74f17540b33cdb78d6e7711c0f6e7",
@@ -272,7 +272,7 @@
         ]
       },
       {
-        "exception": "Expected property \"vout\" of type \"Number\", got String \"foo\"",
+        "exception": "Expected property \"vout\" of type Number, got String \"foo\"",
         "unspents": [
           {
             "txId": "839691f0e681fbfc5f7a3812b616027d6fd74f17540b33cdb78d6e7711c0f6e7",
