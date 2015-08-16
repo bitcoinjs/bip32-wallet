@@ -17,10 +17,6 @@ describe('selectInputs', function () {
     it(f.description, function () {
       var result = selectInputs(unspents, outputs, f.feePerKb)
 
-      var expected = f.expected.inputs.map(function (i) {
-        return unspents[i]
-      })
-
       // ensure remainder is correctly calculated
       assert.equal(result.remainder, f.expected.remainder, 'Invalid remainder: ' + result.remainder + ' !== ' + f.expected.remainder)
 
@@ -28,8 +24,8 @@ describe('selectInputs', function () {
       assert.equal(result.fee, f.expected.fee, 'Invalid fee: ' + result.fee + ' !== ' + f.expected.fee)
 
       // ensure all expected inputs are found
-      expected.forEach(function (input) {
-        assert(result.inputs.indexOf(input) > -1)
+      f.expected.inputs.forEach(function (i, j) {
+        assert.equal(result.inputs[j], unspents[i])
       })
 
       // ensure no other inputs exist
