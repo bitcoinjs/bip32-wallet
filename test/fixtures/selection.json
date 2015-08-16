@@ -80,13 +80,13 @@
   ],
   "invalid": [
     {
-      "exception": "Not enough funds \\(incl\\. fee\\): 20000 < 40000",
+      "exception": "Not enough funds: 20000 < 40000",
       "feePerKb": 10000,
       "outputs": [40000],
       "unspents": [10000, 10000]
     },
     {
-      "exception": "Not enough funds \\(incl\\. fee\\): 40000 < 50000",
+      "exception": "Not enough funds: 40000 < 50000",
       "feePerKb": 10000,
       "outputs": [40000],
       "unspents": [40000]

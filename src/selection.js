@@ -27,56 +27,52 @@ function selectInputs (unspents, outputs, feePerKb) {
   })
 
   var byteLength = TX_EMPTY_SIZE
-  var targetValue = 0
+  var target = 0
 
   outputs.forEach(function (output) {
     byteLength += TX_PUBKEYHASH_OUTPUT
-    targetValue += output.value
+    target += output.value
   })
 
   var accum = 0
-  var candidates = []
-  var total = targetValue
+  var total = target
 
   for (var i = 0; i < sorted.length; ++i) {
     var unspent = sorted[i]
-
-    candidates.push(unspent)
 
     byteLength += TX_PUBKEYHASH_INPUT
     accum += unspent.value
 
     // ignore fees until we have the minimum amount
-    if (accum < targetValue) continue
+    if (accum < target) continue
 
-    var fee = estimateRelayFee(byteLength, feePerKb)
-    var feeWithChange = estimateRelayFee(byteLength + TX_PUBKEYHASH_OUTPUT, feePerKb)
+    var baseFee = estimateRelayFee(byteLength, feePerKb)
+    total = target + baseFee
 
-    total = targetValue + fee
-    var totalWithChange = targetValue + feeWithChange
+    // continue until we can afford the base fee
+    if (accum < total) continue
+    var inputs = sorted.slice(0, i + 1)
 
-    // do we have enough for the fee and change?
-    if (accum >= totalWithChange) {
-      var remainder = accum - totalWithChange
+    var feeAfterChange = estimateRelayFee(byteLength + TX_PUBKEYHASH_OUTPUT, feePerKb)
+    var totalAfterChange = target + feeAfterChange
 
+    // can we afford a change output?
+    if (accum >= totalAfterChange) {
       return {
-        fee: feeWithChange,
-        inputs: candidates,
-        remainder: remainder
+        fee: feeAfterChange,
+        inputs: inputs,
+        remainder: accum - totalAfterChange
       }
     }
 
-    // do we have enough for the fee?
-    if (accum >= total) {
-      return {
-        fee: fee,
-        inputs: candidates,
-        remainder: 0
-      }
+    return {
+      fee: baseFee + (accum - total),
+      inputs: inputs,
+      remainder: 0
     }
   }
 
-  throw new Error('Not enough funds (incl. fee): ' + accum + ' < ' + total)
+  throw new Error('Not enough funds: ' + accum + ' < ' + total)
 }
 
 module.exports = selectInputs
