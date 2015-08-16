@@ -67,6 +67,28 @@
       }
     },
     {
+      "description": "multiple outputs | base fee | remainder expected",
+      "feePerKb": 1000,
+      "unspents": [5000, 5000, 5000, 5000, 5000, 5000],
+      "outputs": [28000, 1000],
+      "expected": {
+        "fee": 1000,
+        "inputs": [0, 1, 2, 3, 4, 5],
+        "remainder": 0
+      }
+    },
+    {
+      "description": "multiple outputs | change fee | remainder exists",
+      "feePerKb": 1000,
+      "unspents": [7000, 5000, 5000, 5000, 5000, 5000],
+      "outputs": [28000, 1000],
+      "expected": {
+        "fee": 2000,
+        "inputs": [0, 1, 2, 3, 4, 5],
+        "remainder": 1000
+      }
+    },
+    {
       "description": "no outputs | remainder expected",
       "feePerKb": 10000,
       "outputs": [],
