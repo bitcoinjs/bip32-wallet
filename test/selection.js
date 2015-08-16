@@ -3,7 +3,7 @@
 var assert = require('assert')
 
 var selectInputs = require('../src/selection')
-var fixtures = require('./fixtures/selection.json')
+var fixtures = require('./fixtures/selection')
 
 describe('selectInputs', function () {
   fixtures.valid.forEach(function (f) {
