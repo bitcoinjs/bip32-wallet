@@ -129,7 +129,7 @@ describe('Wallet fixtures', function () {
       describe('createTransaction', function () {
         f.transactions.forEach(function (t) {
           it(t.description, function () {
-            var formed = wallet.createTransaction(t.outputs, t.options)
+            var formed = wallet.createTransaction(t.outputs)
             var tx = formed.transaction
             var totalInputValue = 0
 
