@@ -1,6 +1,6 @@
 {
   "name": "bip32-wallet",
-  "version": "0.3.8",
+  "version": "0.3.9",
   "description": "A BIP32 Wallet backed by bitcoinjs-lib, lite on features but heavily tested.",
   "main": "./src/index.js",
   "scripts": {
