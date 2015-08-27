@@ -107,13 +107,13 @@ Wallet.prototype.createTransaction = function (outputs, external, internal) {
 
 Wallet.prototype.containsAddress = function (address) { return this.account.containsAddress(address) }
 Wallet.prototype.discover = function (gapLimit, queryCallback, done) {
-  function discoverChain (iterator, callback) {
-    bip32utils.discovery(iterator, gapLimit, queryCallback, function (err, used, checked) {
+  function discoverChain (chain, callback) {
+    bip32utils.discovery(chain, gapLimit, queryCallback, function (err, used, checked) {
       if (err) return callback(err)
 
       // throw away ALL unused addresses AFTER the last unused address
       var unused = checked - used
-      for (var i = 1; i < unused; ++i) iterator.pop()
+      for (var i = 1; i < unused; ++i) chain.pop()
 
       return callback()
     })
@@ -168,9 +168,8 @@ Wallet.prototype.signWith = function (tx, addresses, external, internal) {
   external = external || this.external
   internal = internal || this.internal
 
-  var nodes = this.account.getNodes(addresses, external, internal)
-
-  nodes.forEach(function (node, i) {
+  var children = this.account.getChildren(addresses, external, internal)
+  children.forEach(function (node, i) {
     tx.sign(i, node.privKey)
   })
 
