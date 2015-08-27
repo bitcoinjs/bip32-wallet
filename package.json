@@ -19,7 +19,7 @@
   },
   "homepage": "https://github.com/dcousens/bip32-wallet",
   "dependencies": {
-    "bip32-utils": "^0.5.0",
+    "bip32-utils": "^0.5.1",
     "bip69": "^1.0.3",
     "bitcoinjs-lib": "^1.5.0"
   },
