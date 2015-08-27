@@ -98,6 +98,7 @@ describe('Wallet', function () {
   })
 })
 
+// TODO: FIXME: Generate CORRECT fixtures, also, cover more cases, cleanup
 describe('Wallet fixtures', function () {
   fixtures.valid.forEach(function (f, i) {
     describe('Fixture ' + i, function () {
