@@ -264,16 +264,6 @@ describe('Wallet fixtures', function () {
         })
       })
 
-      describe('getConfirmedBalance', function () {
-        beforeEach(function () {
-          wallet.setUnspentOutputs(f.json.unspents)
-        })
-
-        it('sums confirmed unspents', function () {
-          assert.equal(wallet.getConfirmedBalance(), f.confirmedBalance)
-        })
-      })
-
       describe('getNetwork', function () {
         it('returns the accounts network', function () {
           assert.equal(wallet.getNetwork(), wallet.account.getNetwork())

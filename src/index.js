@@ -63,12 +63,7 @@ Wallet.prototype.createTransaction = function (outputs, external, internal) {
   internal = internal || this.internal
   var network = this.getNetwork()
 
-  // filter un-confirmed
-  var unspents = this.unspents.filter(function (unspent) {
-    return unspent.confirmations > 0
-  })
-
-  var selection = selectInputs(unspents, outputs, network.feePerKb)
+  var selection = selectInputs(this.unspents, outputs, network.feePerKb)
   var remainder = selection.remainder
   var fee = selection.fee
   var inputs = selection.inputs
@@ -140,14 +135,6 @@ Wallet.prototype.discover = function (gapLimit, queryCallback, done) {
 Wallet.prototype.getAllAddresses = function () { return this.account.getAllAddresses() }
 Wallet.prototype.getBalance = function () {
   return this.unspents.reduce(function (accum, unspent) {
-    return accum + unspent.value
-  }, 0)
-}
-Wallet.prototype.getConfirmedBalance = function () {
-  return this.unspents.filter(function (unspent) {
-    return unspent.confirmations > 0
-
-  }).reduce(function (accum, unspent) {
     return accum + unspent.value
   }, 0)
 }
