@@ -1,26 +1,45 @@
 var bip32utils = require('bip32-utils')
 var bip69 = require('bip69')
 var bitcoin = require('bitcoinjs-lib')
+var each = require('async-each')
 var networks = bitcoin.networks
 var selectInputs = require('./selection')
 
 function Wallet (external, internal) {
-  this.account = new bip32utils.Account(external, internal)
-  this.external = external
-  this.internal = internal
+  var chains
+  if (Array.isArray(external)) {
+    chains = external
+    this.external = chains[0].getParent()
+    this.internal = chains[1].getParent()
+
+  } else {
+    chains = [new bip32utils.Chain(external), new bip32utils.Chain(internal)]
+
+    this.external = external
+    this.internal = internal
+  }
+
+  this.account = new bip32utils.Account(chains)
   this.unspents = []
 }
 
 Wallet.fromJSON = function (json) {
-  var external = bitcoin.HDNode.fromBase58(json.external.node)
-  var internal = bitcoin.HDNode.fromBase58(json.internal.node)
-  var wallet = new Wallet(external, internal)
-  wallet.account.external.addresses = json.external.addresses
-  wallet.account.internal.addresses = json.internal.addresses
-  wallet.account.external.map = json.external.map
-  wallet.account.internal.map = json.internal.map
-  wallet.account.external.k = json.external.k
-  wallet.account.internal.k = json.internal.k
+  function toChain (cjson) {
+    var chain = new bip32utils.Chain(bitcoin.HDNode.fromBase58(cjson.node), cjson.k)
+    chain.addresses = cjson.addresses
+    chain.map = cjson.map
+
+    return chain
+  }
+
+  var chains
+  if (json.chains) {
+    chains = json.chains.map(toChain)
+  } else if (json.external) {
+    chains = [toChain(json.external), toChain(json.internal)]
+  }
+
+  var wallet = new Wallet(chains)
   wallet.unspents = json.unspents
 
   return wallet
@@ -119,14 +138,7 @@ Wallet.prototype.discover = function (gapLimit, queryCallback, done) {
     })
   }
 
-  var external = this.account.external
-  var internal = this.account.internal
-
-  discoverChain(external, function (err) {
-    if (err) return done(err)
-
-    discoverChain(internal, done)
-  })
+  each(this.account.getChains(), discoverChain, done)
 }
 Wallet.prototype.getAllAddresses = function () { return this.account.getAllAddresses() }
 Wallet.prototype.getBalance = function () {
@@ -134,7 +146,6 @@ Wallet.prototype.getBalance = function () {
     return accum + unspent.value
   }, 0)
 }
-Wallet.prototype.getChangeAddress = function () { return this.account.getInternalAddress() }
 Wallet.prototype.getConfirmedBalance = function () {
   return this.unspents.filter(function (unspent) {
     return unspent.confirmations > 0
@@ -144,11 +155,12 @@ Wallet.prototype.getConfirmedBalance = function () {
   }, 0)
 }
 Wallet.prototype.getNetwork = function () { return this.account.getNetwork() }
-Wallet.prototype.getReceiveAddress = function () { return this.account.getExternalAddress() }
-Wallet.prototype.isChangeAddress = function (address) { return this.account.isInternalAddress(address) }
-Wallet.prototype.isReceiveAddress = function (address) { return this.account.isExternalAddress(address) }
-Wallet.prototype.nextChangeAddress = function () { return this.account.nextInternalAddress() }
-Wallet.prototype.nextReceiveAddress = function () { return this.account.nextExternalAddress() }
+Wallet.prototype.getReceiveAddress = function () { return this.account.getChainAddress(0) }
+Wallet.prototype.getChangeAddress = function () { return this.account.getChainAddress(1) }
+Wallet.prototype.isReceiveAddress = function (address) { return this.account.isChainAddress(0, address) }
+Wallet.prototype.isChangeAddress = function (address) { return this.account.isChainAddress(1, address) }
+Wallet.prototype.nextReceiveAddress = function () { return this.account.nextChainAddress(0) }
+Wallet.prototype.nextChangeAddress = function () { return this.account.nextChainAddress(1) }
 
 Wallet.prototype.getUnspentOutputs = function (unspents) { return this.unspents }
 Wallet.prototype.setUnspentOutputs = function (unspents) {
@@ -168,7 +180,8 @@ Wallet.prototype.signWith = function (tx, addresses, external, internal) {
   external = external || this.external
   internal = internal || this.internal
 
-  var children = this.account.getChildren(addresses, external, internal)
+  var children = this.account.getChildren(addresses, [external, internal])
+
   children.forEach(function (node, i) {
     tx.sign(i, node.privKey)
   })
@@ -177,19 +190,18 @@ Wallet.prototype.signWith = function (tx, addresses, external, internal) {
 }
 
 Wallet.prototype.toJSON = function () {
+  var chains = this.account.chains.map(function (chain) {
+    return {
+      addresses: chain.addresses,
+      map: chain.map,
+      k: chain.k,
+      node: chain.getParent().toBase58()
+    }
+  })
+
   return {
-    external: {
-      addresses: this.account.external.addresses,
-      map: this.account.external.map,
-      k: this.account.external.k,
-      node: this.external.toBase58()
-    },
-    internal: {
-      addresses: this.account.internal.addresses,
-      map: this.account.internal.map,
-      k: this.account.internal.k,
-      node: this.internal.toBase58()
-    },
+    external: chains[0],
+    internal: chains[1],
     unspents: this.unspents
   }
 }
