@@ -82,10 +82,6 @@
       ],
       "json": {
         "external": {
-          "addresses": [
-            "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa",
-            "n2fiWrHqD6GM5GiEqkbWAc6aaZQp3ba93X"
-          ],
           "k": 0,
           "map": {
             "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa": 0,
@@ -94,10 +90,6 @@
           "node": "tprv8egjKjkFbDGo2jWKNuWRQn8krt7SXC6nCxey8kLEUK5tjEDEUbH5ugBm8fcqyuL8G1fp6aEUeTkmxmrrytPqAYbkXuG5E2yugr8f4jNHDS4"
         },
         "internal": {
-          "addresses": [
-            "mnXiDR4MKsFxcKJEZjx4353oXvo55iuptn",
-            "mtQrg4dcAVhDDzbyXawmRbpzRTRiUgfAE5"
-          ],
           "k": 0,
           "map": {
             "mnXiDR4MKsFxcKJEZjx4353oXvo55iuptn": 0,
@@ -146,10 +138,6 @@
       ],
       "json": {
         "external": {
-          "addresses": [
-            "LeyySKbQrRRwodKEj1W4a8y3YQupPLw5os",
-            "LgNiV1WgUj59YxvnJKcRchx1vnBPGD7SgB"
-          ],
           "k": 0,
           "map": {
             "LeyySKbQrRRwodKEj1W4a8y3YQupPLw5os": 0,
@@ -158,10 +146,6 @@
           "node": "Ltpv76FuomkJfbn4GtvNAEhYPYjWk2A6Nfk7HPmQDpJCyzBVxSF2MrhtkmWyBFzCrFazogiKAzGEeBsdVRSCFo2rzbhVxpzwsdJta918gXQNeZQ"
         },
         "internal": {
-          "addresses": [
-            "LSEiBaHCbW4m61Wn2JxyVAuEt9ZeKANb5s",
-            "LY7reDrTS8W1hgpWz9xgshgRmgCHiCb4Rq"
-          ],
           "k": 0,
           "map": {
             "LSEiBaHCbW4m61Wn2JxyVAuEt9ZeKANb5s": 0,

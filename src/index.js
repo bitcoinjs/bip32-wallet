@@ -26,8 +26,10 @@ function Wallet (external, internal) {
 Wallet.fromJSON = function (json) {
   function toChain (cjson) {
     var chain = new bip32utils.Chain(bitcoin.HDNode.fromBase58(cjson.node), cjson.k)
-    chain.addresses = cjson.addresses
     chain.map = cjson.map
+    chain.addresses = Object.keys(chain.map).sort(function (a, b) {
+      return chain.map[a] - chain.map[b]
+    })
 
     return chain
   }
@@ -176,9 +178,8 @@ Wallet.prototype.signWith = function (tx, addresses, external, internal) {
 Wallet.prototype.toJSON = function () {
   var chains = this.account.chains.map(function (chain) {
     return {
-      addresses: chain.addresses,
-      map: chain.map,
       k: chain.k,
+      map: chain.map,
       node: chain.getParent().toBase58()
     }
   })
