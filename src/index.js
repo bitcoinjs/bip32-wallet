@@ -26,8 +26,10 @@ function Wallet (external, internal) {
 Wallet.fromJSON = function (json) {
   function toChain (cjson) {
     var chain = new bip32utils.Chain(bitcoin.HDNode.fromBase58(cjson.node), cjson.k)
-    chain.addresses = cjson.addresses
     chain.map = cjson.map
+    chain.addresses = Object.keys(chain.map).sort(function (a, b) {
+      return chain.map[a] - chain.map[b]
+    })
 
     return chain
   }
@@ -63,12 +65,7 @@ Wallet.prototype.createTransaction = function (outputs, external, internal) {
   internal = internal || this.internal
   var network = this.getNetwork()
 
-  // filter un-confirmed
-  var unspents = this.unspents.filter(function (unspent) {
-    return unspent.confirmations > 0
-  })
-
-  var selection = selectInputs(unspents, outputs, network.feePerKb)
+  var selection = selectInputs(this.unspents, outputs, network.feePerKb)
   var remainder = selection.remainder
   var fee = selection.fee
   var inputs = selection.inputs
@@ -143,14 +140,6 @@ Wallet.prototype.getBalance = function () {
     return accum + unspent.value
   }, 0)
 }
-Wallet.prototype.getConfirmedBalance = function () {
-  return this.unspents.filter(function (unspent) {
-    return unspent.confirmations > 0
-
-  }).reduce(function (accum, unspent) {
-    return accum + unspent.value
-  }, 0)
-}
 Wallet.prototype.getNetwork = function () { return this.account.getNetwork() }
 Wallet.prototype.getReceiveAddress = function () { return this.account.getChainAddress(0) }
 Wallet.prototype.getChangeAddress = function () { return this.account.getChainAddress(1) }
@@ -189,9 +178,8 @@ Wallet.prototype.signWith = function (tx, addresses, external, internal) {
 Wallet.prototype.toJSON = function () {
   var chains = this.account.chains.map(function (chain) {
     return {
-      addresses: chain.addresses,
-      map: chain.map,
       k: chain.k,
+      map: chain.map,
       node: chain.getParent().toBase58()
     }
   })
