@@ -11,7 +11,6 @@ function Wallet (external, internal) {
     chains = external
     this.external = chains[0].getParent()
     this.internal = chains[1].getParent()
-
   } else {
     chains = [new bip32utils.Chain(external), new bip32utils.Chain(internal)]
 
