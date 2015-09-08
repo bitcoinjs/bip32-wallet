@@ -47,8 +47,6 @@ describe('Wallet', function () {
       var callback = function () {}
 
       var mock = this.mock(bip32utils).expects('discovery')
-      mock.calledWithExactly(wallet.account.chains[0], gapLimit, query, callback)
-      mock.calledWithExactly(wallet.account.chains[1], gapLimit, query, callback)
       mock.twice()
 
       wallet.discover(gapLimit, query, callback)
@@ -60,10 +58,10 @@ describe('Wallet', function () {
     bip32FunctionName = bip32FunctionName || functionName
 
     it('wraps account.' + bip32FunctionName + ' with ' + bfArgs, sinon.test(function () {
-      var spy = this.mock(wallet.account).expects(bip32FunctionName)
-      wallet[functionName].apply(wallet, fArgs)
+      var mock = this.mock(wallet.account).expects(bip32FunctionName)
+      mock.withArgs.apply(mock, bfArgs)
 
-      assert(spy.calledWithExactly.apply(spy, bfArgs))
+      wallet[functionName].apply(wallet, fArgs)
     }))
   }
 
