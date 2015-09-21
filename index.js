@@ -2,8 +2,9 @@ var bip32utils = require('bip32-utils')
 var bip69 = require('bip69')
 var bitcoin = require('bitcoinjs-lib')
 var each = require('async-each')
-var networks = bitcoin.networks
 var coinSelect = require('coinselect')
+
+var NETWORKS = bitcoin.networks
 
 function Wallet (external, internal) {
   var chains
@@ -47,7 +48,7 @@ Wallet.fromJSON = function (json) {
 }
 
 Wallet.fromSeedBuffer = function (seed, network) {
-  network = network || networks.bitcoin
+  network = network || NETWORKS.bitcoin
 
   // HD first-level child derivation method should be hardened
   // See https://bitcointalk.org/index.php?topic=405179.msg4415254#msg4415254
