@@ -2,7 +2,7 @@
   "name": "bip32-wallet",
   "version": "0.4.1",
   "description": "A BIP32 Wallet backed by bitcoinjs-lib, lite on features but heavily tested.",
-  "main": "./src/index.js",
+  "main": "./index.js",
   "scripts": {
     "prepublish": "npm run test",
     "standard": "standard",
@@ -11,19 +11,20 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/dcousens/bip32-wallet.git"
+    "url": "https://github.com/bitcoinjs/bip32-wallet.git"
   },
   "author": "Daniel Cousens",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/dcousens/bip32-wallet/issues"
+    "url": "https://github.com/bitcoinjs/bip32-wallet/issues"
   },
-  "homepage": "https://github.com/dcousens/bip32-wallet",
+  "homepage": "https://github.com/bitcoinjs/bip32-wallet",
   "dependencies": {
     "async-each": "^0.1.6",
     "bip32-utils": "^0.6.2",
     "bip69": "^1.0.3",
-    "bitcoinjs-lib": "^1.5.0"
+    "bitcoinjs-lib": "^1.5.0",
+    "coinselect": "^0.1.0"
   },
   "devDependencies": {
     "mocha": "*",

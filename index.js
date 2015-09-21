@@ -3,7 +3,7 @@ var bip69 = require('bip69')
 var bitcoin = require('bitcoinjs-lib')
 var each = require('async-each')
 var networks = bitcoin.networks
-var selectInputs = require('./selection')
+var coinSelect = require('coinselect')
 
 function Wallet (external, internal) {
   var chains
@@ -64,7 +64,7 @@ Wallet.prototype.createTransaction = function (outputs, external, internal) {
   internal = internal || this.internal
   var network = this.getNetwork()
 
-  var selection = selectInputs(this.unspents, outputs, network.feePerKb)
+  var selection = coinSelect(this.unspents, outputs, network.feePerKb)
   var remainder = selection.remainder
   var fee = selection.fee
   var inputs = selection.inputs
