@@ -51,6 +51,30 @@ describe('Wallet', function () {
       wallet.discover(gapLimit, query, callback)
       mock.callArgWith(3, null, 0, 1)
     }))
+
+    describe('discover', function () {
+      it('each account retains all used addresses and ONE unused address', sinon.test(function () {
+        var i = 0
+        var results = [
+          // external
+          true, true, true, false, false, false,
+
+          // internal
+          true, true, false, false
+        ]
+
+        var query = function (a, callback) {
+          i += a.length
+          return callback(null, results.slice(i - a.length, i))
+        }
+
+        wallet.discover(2, query, function (err) {
+          assert.ifError(err)
+          assert.equal(wallet.account.chains[0].k, 3)
+          assert.equal(wallet.account.chains[1].k, 2)
+        })
+      }))
+    })
   })
 
   function wrapsBIP32 (functionName, bip32FunctionName, fArgs, bfArgs) {
@@ -64,291 +88,155 @@ describe('Wallet', function () {
     }))
   }
 
-  describe('containsAddress', function () { wrapsBIP32('containsAddress', '', ['X'], ['X']) })
-  describe('getAllAddresses', function () { wrapsBIP32('getAllAddresses') })
-  describe('getNetwork', function () { wrapsBIP32('getNetwork') })
+  describe('containsAddress', function () {
+    wrapsBIP32('containsAddress', '', ['X'], ['X'])
 
-  describe('getReceiveAddress', function () { wrapsBIP32('getReceiveAddress', 'getChainAddress', [], [0]) })
-  describe('getChangeAddress', function () { wrapsBIP32('getChangeAddress', 'getChainAddress', [], [1]) })
+    fixtures.wallets.forEach(function (f) {
+      var wallet = Wallet.fromJSON(f.json)
 
-  describe('isReceiveAddress', function () { wrapsBIP32('isReceiveAddress', 'isChainAddress', ['X'], [0, 'X']) })
-  describe('isChangeAddress', function () { wrapsBIP32('isChangeAddress', 'isChainAddress', ['X'], [1, 'X']) })
+      it('returns the expected results', function () {
+        Object.keys(f.json.external.map).forEach(function (address) {
+          assert(wallet.containsAddress(address))
+        })
 
-  describe('nextReceiveAddress', function () { wrapsBIP32('nextReceiveAddress', 'nextChainAddress', [], [0]) })
-  describe('nextChangeAddress', function () { wrapsBIP32('nextChangeAddress', 'nextChainAddress', [], [1]) })
+        Object.keys(f.json.internal.map).forEach(function (address) {
+          assert(wallet.containsAddress(address))
+        })
 
-  describe('setUnspentOutputs', function () {
-    var wallet
-
-    beforeEach(function () {
-      var seed = new Buffer(32)
-      wallet = Wallet.fromSeedBuffer(seed)
-    })
-
-    fixtures.invalid.setUnspentOutputs.forEach(function (f) {
-      it('throws "' + f.exception + '" when necessary', function () {
-        assert.throws(function () {
-          wallet.setUnspentOutputs(f.unspents)
-        }, new RegExp(f.exception))
+        assert(!wallet.containsAddress('1MsHWS1BnwMc3tLE8G35UXsS58fKipzB7a'))
       })
     })
   })
-})
 
-// TODO: FIXME: Generate CORRECT fixtures, also, cover more cases, cleanup
-describe('Wallet fixtures', function () {
-  fixtures.valid.forEach(function (f, i) {
-    describe('Fixture ' + i, function () {
+  describe('getAllAddresses', function () {
+    wrapsBIP32('getAllAddresses')
+
+    fixtures.wallets.forEach(function (f) {
+      var wallet = Wallet.fromJSON(f.json)
+
+      it('returns all known addresses', function () {
+        var fAllAddresses = Object.keys(f.json.external.map).concat(Object.keys(f.json.internal.map))
+        var allAddresses = wallet.getAllAddresses()
+
+        fAllAddresses.forEach(function (address) {
+          assert(allAddresses.indexOf(address) !== -1, address)
+        })
+      })
+    })
+  })
+
+  describe('getNetwork', function () {
+    wrapsBIP32('getNetwork')
+
+    it('returns the accounts network', function () {
+      assert.equal(wallet.getNetwork(), wallet.account.getNetwork())
+    })
+  })
+
+  describe('getReceiveAddress', function () {
+    wrapsBIP32('getReceiveAddress', 'getChainAddress', [], [0])
+
+    it('returns the current external Address', function () {
+      wallet.nextReceiveAddress()
+
+      assert.equal(wallet.getReceiveAddress(), wallet.account.getChainAddress(0))
+    })
+  })
+
+  describe('getChangeAddress', function () {
+    wrapsBIP32('getChangeAddress', 'getChainAddress', [], [1])
+
+    it('returns the current internal Address', function () {
+      wallet.nextChangeAddress()
+
+      assert.equal(wallet.getChangeAddress(), wallet.account.getChainAddress(1))
+    })
+  })
+
+  describe('isReceiveAddress', function () {
+    wrapsBIP32('isReceiveAddress', 'isChainAddress', ['X'], [0, 'X'])
+
+    it('returns true for a valid receive address', function () {
+      assert(wallet.isReceiveAddress(wallet.getReceiveAddress()))
+    })
+  })
+
+  describe('isChangeAddress', function () {
+    wrapsBIP32('isChangeAddress', 'isChainAddress', ['X'], [1, 'X'])
+
+    it('returns true for a valid change address', function () {
+      assert(wallet.isChangeAddress(wallet.getChangeAddress()))
+    })
+  })
+
+  describe('nextReceiveAddress', function () {
+    wrapsBIP32('nextReceiveAddress', 'nextChainAddress', [], [0])
+
+    it('returns the new receive Address', function () {
+      var result = wallet.nextReceiveAddress()
+
+      assert.equal(result, wallet.getReceiveAddress())
+    })
+  })
+
+  describe('nextChangeAddress', function () {
+    wrapsBIP32('nextChangeAddress', 'nextChainAddress', [], [1])
+
+    it('returns the new change Address', function () {
+      var result = wallet.nextChangeAddress()
+
+      assert.equal(result, wallet.getChangeAddress())
+    })
+  })
+
+  describe('fromJSON/toJSON', function () {
+    fixtures.wallets.forEach(function (f) {
+      var wallet = Wallet.fromJSON(f.json)
+
+      it('imports ' + f.seed.slice(0, 20) + '... from JSON', function () {
+        Object.keys(f.json.external.map).forEach(function (address) {
+          assert(wallet.account.chains[0].addresses.indexOf(address) !== -1, address)
+        })
+
+        Object.keys(f.json.internal.map).forEach(function (address) {
+          assert(wallet.account.chains[1].addresses.indexOf(address) !== -1, address)
+        })
+
+        assert.equal(wallet.account.chains[0].map, f.json.external.map)
+        assert.equal(wallet.account.chains[1].map, f.json.internal.map)
+        assert.equal(wallet.unspents, f.json.unspents)
+      })
+
+      it('exports ' + f.seed.slice(0, 20) + '... to JSON', function () {
+        assert.deepEqual(wallet.toJSON(), f.json)
+      })
+    })
+  })
+
+  describe('createTransaction', function () {
+    fixtures.transactions.forEach(function (f) {
       var wallet
 
       beforeEach(function () {
-        wallet = Wallet.fromJSON(f.json)
+        var walletJson = fixtures.wallets[f.wallet].json
+        wallet = Wallet.fromJSON(walletJson)
       })
 
-      describe('fromJSON', function () {
-        it('imports from a JSON object', function () {
-          Object.keys(f.json.external.map).forEach(function (address) {
-            assert(wallet.account.chains[0].addresses.indexOf(address) !== -1, address)
-          })
-
-          Object.keys(f.json.internal.map).forEach(function (address) {
-            assert(wallet.account.chains[1].addresses.indexOf(address) !== -1, address)
-          })
-
-          assert.equal(wallet.account.chains[0].map, f.json.external.map)
-          assert.equal(wallet.account.chains[1].map, f.json.internal.map)
-          assert.equal(wallet.unspents, f.json.unspents)
+      if (f.exception) {
+        it('throws ' + f.exception, function () {
+          assert.throws(function () {
+            wallet.createTransaction(f.inputs, f.outputs, f.wantedFee)
+          }, new RegExp(f.exception))
         })
-      })
+      } else {
+        it('creates ' + f.description + ' (' + f.expected.txId.slice(0, 20) + '... )', function () {
+          var result = wallet.createTransaction(f.inputs, f.outputs, f.wantedFee)
 
-      describe('containsAddress', function () {
-        it('returns the expected results', function () {
-          Object.keys(f.json.external.map).forEach(function (address) {
-            assert(wallet.containsAddress(address))
-          })
-
-          Object.keys(f.json.internal.map).forEach(function (address) {
-            assert(wallet.containsAddress(address))
-          })
-
-          assert(!wallet.containsAddress('1MsHWS1BnwMc3tLE8G35UXsS58fKipzB7a'))
+          assert.equal(result.change, f.expected.change)
+          assert.equal(result.fee, f.expected.fee)
+          assert.equal(result.transaction.getId(), f.expected.txId)
         })
-      })
-
-      describe('createTransaction', function () {
-        f.transactions.forEach(function (t) {
-          it(t.description, function () {
-            var formed = wallet.createTransaction(t.outputs)
-            var tx = formed.transaction
-            var totalInputValue = 0
-
-            // ensure all expected inputs are found (and sum input values)
-            t.expected.inputs.forEach(function (index) {
-              var unspent = f.json.unspents[index]
-
-              totalInputValue += unspent.value
-
-              assert(tx.ins.some(function (txIn) {
-                var txId = bitcoin.bufferutils.reverse(txIn.hash).toString('hex')
-
-                return unspent.txId === txId && unspent.vout === txIn.index
-              }))
-            })
-
-            // ensure no other inputs exist
-            assert.equal(tx.ins.length, t.expected.inputs.length)
-
-            var network = wallet.getNetwork()
-
-            // ensure all expected outputs are found
-            t.outputs.forEach(function (output) {
-              assert(tx.outs.some(function (txOut) {
-                var address = bitcoin.Address.fromOutputScript(txOut.script, network).toString()
-
-                return output.address === address && output.value === txOut.value
-              }))
-            })
-
-            // ensure no other outputs exist (unless change is expected)
-            assert.equal(tx.outs.length, t.outputs.length + !!t.expected.change)
-
-            var txOutAddresses = tx.outs.map(function (txOut) {
-              return bitcoin.Address.fromOutputScript(txOut.script, network).toString()
-            })
-
-            // enforce the change address is as expected
-            if (tx.outs.length > t.outputs.length) {
-              var changeAddress = wallet.getChangeAddress()
-
-              assert(txOutAddresses.some(function (address) {
-                return changeAddress === address
-              }))
-            }
-
-            // validate BIP69 is in effect
-            var inputs = tx.ins.map(function (input) {
-              var txId = bitcoin.bufferutils.reverse(input.hash).toString('hex')
-
-              return {
-                txId: txId,
-                vout: input.vout
-              }
-            })
-
-            assert.deepEqual(inputs, bip69.sortInputs(inputs))
-            assert.deepEqual(tx.outs, bip69.sortOutputs(tx.outs))
-
-            // validate total input/output values
-            var totalOutputValue = tx.outs.reduce(function (a, x) { return a + x.value }, 0)
-
-            var expectedOutputValue = t.outputs.reduce(function (a, x) { return a + x.value }, 0)
-            var actualChange = totalOutputValue - expectedOutputValue
-            var actualFee = totalInputValue - totalOutputValue
-
-            assert.equal(actualChange, formed.change)
-            assert.equal(actualChange, t.expected.change)
-            assert.equal(actualFee, formed.fee)
-            assert.equal(actualFee, t.expected.fee)
-
-            // catch-all verification
-            assert.equal(tx.getId(), t.expected.txId)
-          })
-        })
-
-        // TODO: it('throws when value is below dust threshold', function () {})
-      })
-
-      describe('discover', function () {
-        it('accounts each retain used addresses and ONE unused address', sinon.test(function () {
-          var i = 0
-          var results = [
-            // external
-            true, true, true, false, false, false,
-
-            // internal
-            true, true, false, false
-          ]
-
-          var query = function (a, callback) {
-            i += a.length
-            return callback(null, results.slice(i - a.length, i))
-          }
-
-          wallet.discover(2, query, function (err) {
-            assert.ifError(err)
-            assert.equal(wallet.account.chains[0].k, 3)
-            assert.equal(wallet.account.chains[1].k, 2)
-          })
-        }))
-      })
-
-      describe('getAllAddresses', function () {
-        it('returns all known addresses', function () {
-          var fAllAddresses = Object.keys(f.json.external.map).concat(Object.keys(f.json.internal.map))
-          var allAddresses = wallet.getAllAddresses()
-
-          fAllAddresses.forEach(function (address) {
-            assert(allAddresses.indexOf(address) !== -1, address)
-          })
-        })
-      })
-
-      describe('getBalance', function () {
-        beforeEach(function () {
-          wallet.setUnspentOutputs(f.json.unspents)
-        })
-
-        it('sums all unspents', function () {
-          assert.equal(wallet.getBalance(), f.balance)
-        })
-      })
-
-      describe('getChangeAddress', function () {
-        it('returns the current internal Address', function () {
-          wallet.nextChangeAddress()
-
-          assert.equal(wallet.getChangeAddress(), wallet.account.getChainAddress(1))
-        })
-      })
-
-      describe('getNetwork', function () {
-        it('returns the accounts network', function () {
-          assert.equal(wallet.getNetwork(), wallet.account.getNetwork())
-        })
-      })
-
-      describe('getReceiveAddress', function () {
-        it('returns the current external Address', function () {
-          wallet.nextReceiveAddress()
-
-          assert.equal(wallet.getReceiveAddress(), wallet.account.getChainAddress(0))
-        })
-      })
-
-      describe('isReceiveAddress', function () {
-        it('returns true for a valid receive address', function () {
-          assert(wallet.isReceiveAddress(wallet.getReceiveAddress()))
-        })
-      })
-
-      describe('isChangeAddress', function () {
-        it('returns true for a valid change address', function () {
-          assert(wallet.isChangeAddress(wallet.getChangeAddress()))
-        })
-      })
-
-      describe('nextChangeAddress', function () {
-        it('returns the new change Address', function () {
-          var result = wallet.nextChangeAddress()
-
-          assert.equal(result, wallet.getChangeAddress())
-        })
-      })
-
-      describe('nextReceiveAddress', function () {
-        it('returns the new receive Address', function () {
-          var result = wallet.nextReceiveAddress()
-
-          assert.equal(result, wallet.getReceiveAddress())
-        })
-      })
-
-      describe('setUnspentOutputs', function () {
-        it('sets wallet.unspents', function () {
-          wallet.setUnspentOutputs(f.json.unspents)
-
-          assert.equal(wallet.unspents, f.json.unspents)
-        })
-      })
-
-      describe('signWith', function () {
-        it('signs Transaction inputs with respective keys', function () {
-          var txb = new bitcoin.TransactionBuilder()
-
-          f.json.unspents.forEach(function (unspent) {
-            txb.addInput(unspent.txId, unspent.vout)
-          })
-
-          txb.addOutput(wallet.getReceiveAddress(), 1e5)
-
-          var addresses = f.json.unspents.map(function (unspent) { return unspent.address })
-          var tx = wallet.signWith(txb, addresses).build()
-          var network = wallet.getNetwork()
-
-          addresses.forEach(function (address, i) {
-            var input = tx.ins[i]
-            var pubKey = bitcoin.ECPubKey.fromBuffer(input.script.chunks[1])
-
-            assert.equal(pubKey.getAddress(network).toString(), address)
-          })
-        })
-      })
-
-      describe('toJSON', function () {
-        it('exports a JSON object', function () {
-          assert.deepEqual(wallet.toJSON(), f.json)
-        })
-      })
+      }
     })
   })
 })

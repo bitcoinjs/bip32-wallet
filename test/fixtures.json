@@ -1,85 +1,8 @@
 {
-  "valid": [
+  "wallets": [
     {
       "seed": "043c72ff615427ee4daf77b05206abd27de3b7655736539b88ea4e533bbd492d",
       "network": "testnet",
-      "balance": 200000,
-      "transactions": [
-        {
-          "description": "standard transaction (no change)",
-          "outputs": [
-            {
-              "address": "n2PEoV6Abxnrpzoqqq1TJT5kw8G2dMPpBd",
-              "value": 165000
-            }
-          ],
-          "expected": {
-            "txId": "f1f48f18f7821f70eef40c4bcc7bb0ba7d9704469684c85ab05ca43abe1d1f2a",
-            "inputs": [
-              1
-            ],
-            "change": 0,
-            "fee": 10000
-          }
-        },
-        {
-          "description": "standard transaction",
-          "outputs": [
-            {
-              "address": "n2PEoV6Abxnrpzoqqq1TJT5kw8G2dMPpBd",
-              "value": 177000
-            }
-          ],
-          "expected": {
-            "txId": "7dc161ca3c5df67f82af7db67e6078ff4e036ce7afa53b068184f957bcc02526",
-            "inputs": [
-              0,
-              1
-            ],
-            "change": 13000,
-            "fee": 10000
-          }
-        },
-        {
-          "description": "many outputs transaction",
-          "outputs": [
-            {
-              "address": "n2PEoV6Abxnrpzoqqq1TJT5kw8G2dMPpBd",
-              "value": 30000
-            },
-            {
-              "address": "mtoKs9V381UAhUia3d7Vb9GNak8Qvmcsme",
-              "value": 40000
-            }
-          ],
-          "expected": {
-            "txId": "0f81b1619e83fb7260734c758212a7e30dbbadb3359fbba0fb9376ddf0eb482b",
-            "inputs": [
-              1
-            ],
-            "change": 95000,
-            "fee": 10000
-          }
-        },
-        {
-          "description": "ignores change if it is not above dust threshold",
-          "outputs": [
-            {
-              "address": "n2PEoV6Abxnrpzoqqq1TJT5kw8G2dMPpBd",
-              "value": 189600
-            }
-          ],
-          "expected": {
-            "txId": "d1aa1e20a0b46311af79b4bf902a3fcbf17fd1ea409bcc5bcee24299d3d44928",
-            "inputs": [
-              0,
-              1
-            ],
-            "change": 0,
-            "fee": 10400
-          }
-        }
-      ],
       "json": {
         "external": {
           "k": 0,
@@ -96,46 +19,12 @@
             "mtQrg4dcAVhDDzbyXawmRbpzRTRiUgfAE5": 1
           },
           "node": "tprv8egjKjkFbDGo7k2fGBRge6BXkasGVw5Ag6Swh1p7KS96AXwFWWFJsg2MhesGtdn1pFXQmpurtJhxpFipEjt8yuS9L7AHnLHGSkNzAgC5RAZ"
-        },
-        "unspents": [
-          {
-            "txId": "839691f0e681fbfc5f7a3812b616027d6fd74f17540b33cdb78d6e7711c0f6e7",
-            "address": "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa",
-            "vout": 0,
-            "value": 25000
-          },
-          {
-            "txId": "51241b0849daa625769f186ac5226be81765720145bbfb468e8a2ce49b690279",
-            "address": "n2fiWrHqD6GM5GiEqkbWAc6aaZQp3ba93X",
-            "vout": 1,
-            "value": 175000
-          }
-        ]
+        }
       }
     },
     {
       "seed": "043c72ff615427ee4daf77b05206abd27de3b7655736539b88ea4e533bbd492d",
       "network": "litecoin",
-      "balance": 400000,
-      "transactions": [
-        {
-          "description": "does not overestimate fees when network has dustSoftThreshold",
-          "outputs": [
-            {
-              "address": "Lg6EmeK1sbbfJh2PJQ2NkYwCHM2buUDWjT",
-              "value": 200000
-            }
-          ],
-          "expected": {
-            "txId": "3413c2b2ecf796d35089a10ebb3dc84debcbef8d12f0dccc6f17423704ebcfe7",
-            "inputs": [
-              0
-            ],
-            "change": 100000,
-            "fee": 100000
-          }
-        }
-      ],
       "json": {
         "external": {
           "k": 0,
@@ -152,33 +41,275 @@
             "LY7reDrTS8W1hgpWz9xgshgRmgCHiCb4Rq": 1
           },
           "node": "Ltpv76FuomkJfbn4MuSi3WcocrnHdiuvMQiVkXZNn5n5q7EhPjy3Pmg7imMZkFEdkz2tMvZurEwct2ppLuJ9WeXAoxXtm2uARvcFL3FTnPAqi9f"
-        },
-        "unspents": [
-          {
-            "txId": "839691f0e681fbfc5f7a3812b616027d6fd74f17540b33cdb78d6e7711c0f6e7",
-            "address": "LeyySKbQrRRwodKEj1W4a8y3YQupPLw5os",
-            "vout": 0,
-            "value": 400000
-          }
-        ]
+        }
       }
     }
   ],
-  "invalid": {
-    "setUnspentOutputs": [
-      {
-        "exception": "Duplicate unspent 839691f0e681fbfc5f7a3812b616027d6fd74f17540b33cdb78d6e7711c0f6e7:4",
-        "unspents": [
-          {
-            "txId": "839691f0e681fbfc5f7a3812b616027d6fd74f17540b33cdb78d6e7711c0f6e7",
-            "vout": 4
-          },
-          {
-            "txId": "839691f0e681fbfc5f7a3812b616027d6fd74f17540b33cdb78d6e7711c0f6e7",
-            "vout": 4
-          }
-        ]
+  "transactions": [
+    {
+      "description": "1:1 transaction",
+      "wallet": 0,
+      "inputs": [
+        {
+          "txId": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "address": "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa",
+          "vout": 0,
+          "value": 120000
+        }
+      ],
+      "outputs": [
+        {
+          "address": "n2PEoV6Abxnrpzoqqq1TJT5kw8G2dMPpBd",
+          "value": 100000
+        }
+      ],
+      "wantedFee": 20000,
+      "expected": {
+        "txId": "TODO",
+        "change": 0,
+        "fee": 20000
       }
-    ]
-  }
+    },
+    {
+      "description": "1:1 transaction (with change)",
+      "wallet": 0,
+      "inputs": [
+        {
+          "txId": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "address": "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa",
+          "vout": 0,
+          "value": 120000
+        }
+      ],
+      "outputs": [
+        {
+          "address": "n2PEoV6Abxnrpzoqqq1TJT5kw8G2dMPpBd",
+          "value": 100000
+        }
+      ],
+      "wantedFee": 10000,
+      "expected": {
+        "txId": "TODO",
+        "change": 10000,
+        "fee": 10000
+      }
+    },
+    {
+      "description": "1:1 transaction (change ignored)",
+      "wallet": 0,
+      "inputs": [
+        {
+          "txId": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "address": "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa",
+          "vout": 0,
+          "value": 120000
+        }
+      ],
+      "outputs": [
+        {
+          "address": "n2PEoV6Abxnrpzoqqq1TJT5kw8G2dMPpBd",
+          "value": 50000
+        },
+        {
+          "address": "n2PEoV6Abxnrpzoqqq1TJT5kw8G2dMPpBd",
+          "value": 50000
+        }
+      ],
+      "wantedFee": 15000,
+      "expected": {
+        "txId": "TODO",
+        "change": 0,
+        "fee": 20000
+      }
+    },
+    {
+      "description": "1:1 transaction (no fee)",
+      "wallet": 0,
+      "inputs": [
+        {
+          "txId": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "address": "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa",
+          "vout": 0,
+          "value": 120000
+        }
+      ],
+      "outputs": [
+        {
+          "address": "n2PEoV6Abxnrpzoqqq1TJT5kw8G2dMPpBd",
+          "value": 50000
+        },
+        {
+          "address": "n2PEoV6Abxnrpzoqqq1TJT5kw8G2dMPpBd",
+          "value": 50000
+        }
+      ],
+      "wantedFee": 0,
+      "expected": {
+        "txId": "TODO",
+        "change": 20000,
+        "fee": 0
+      }
+    },
+    {
+      "description": "1:2 transaction",
+      "wallet": 0,
+      "inputs": [
+        {
+          "txId": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "address": "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa",
+          "vout": 0,
+          "value": 120000
+        }
+      ],
+      "outputs": [
+        {
+          "address": "n2PEoV6Abxnrpzoqqq1TJT5kw8G2dMPpBd",
+          "value": 50000
+        },
+        {
+          "address": "n2PEoV6Abxnrpzoqqq1TJT5kw8G2dMPpBd",
+          "value": 50000
+        }
+      ],
+      "wantedFee": 20000,
+      "expected": {
+        "txId": "TODO",
+        "change": 0,
+        "fee": 20000
+      }
+    },
+    {
+      "description": "1:2 transaction (with change)",
+      "wallet": 0,
+      "inputs": [
+        {
+          "txId": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "address": "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa",
+          "vout": 0,
+          "value": 120000
+        }
+      ],
+      "outputs": [
+        {
+          "address": "n2PEoV6Abxnrpzoqqq1TJT5kw8G2dMPpBd",
+          "value": 50000
+        },
+        {
+          "address": "n2PEoV6Abxnrpzoqqq1TJT5kw8G2dMPpBd",
+          "value": 50000
+        }
+      ],
+      "wantedFee": 10000,
+      "expected": {
+        "txId": "TODO",
+        "change": 10000,
+        "fee": 10000
+      }
+    },
+    {
+      "description": "1:0 transaction (sweep)",
+      "wallet": 0,
+      "inputs": [
+        {
+          "txId": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "address": "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa",
+          "vout": 0,
+          "value": 120000
+        }
+      ],
+      "outputs": [],
+      "wantedFee": 10000,
+      "expected": {
+        "txId": "TODO",
+        "change": 110000,
+        "fee": 10000
+      }
+    },
+    {
+      "description": "2:0 transaction (sweep)",
+      "wallet": 0,
+      "inputs": [
+        {
+          "txId": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "address": "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa",
+          "vout": 0,
+          "value": 120000
+        },
+        {
+          "txId": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "address": "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa",
+          "vout": 1,
+          "value": 120000
+        }
+      ],
+      "outputs": [],
+      "wantedFee": 10000,
+      "expected": {
+        "txId": "TODO",
+        "change": 230000,
+        "fee": 10000
+      }
+    },
+    {
+      "description": "standard (litecoin)",
+      "wallet": 1,
+      "inputs": [
+        {
+          "txId": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "address": "LeyySKbQrRRwodKEj1W4a8y3YQupPLw5os",
+          "vout": 0,
+          "value": 120000
+        }
+      ],
+      "outputs": [
+        {
+          "address": "Lg6EmeK1sbbfJh2PJQ2NkYwCHM2buUDWjT",
+          "value": 100000
+        }
+      ],
+      "expected": {
+        "txId": "TODO",
+        "change": 10000,
+        "fee": 10000
+      }
+    },
+    {
+      "exception": "Not enough funds: 0 < 10000",
+      "wallet": 1,
+      "inputs": [],
+      "wantedFee": 0,
+      "outputs": [
+        {
+          "address": "Lg6EmeK1sbbfJh2PJQ2NkYwCHM2buUDWjT",
+          "value": 100000
+        }
+      ]
+    },
+    {
+      "exception": "Not enough funds: 10000 < 15000",
+      "wallet": 0,
+      "inputs": [
+        {
+          "txId": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "address": "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa",
+          "vout": 0,
+          "value": 10000
+        }
+      ],
+      "wantedFee": 5000,
+      "outputs": [
+        {
+          "address": "n2PEoV6Abxnrpzoqqq1TJT5kw8G2dMPpBd",
+          "value": 10000
+        }
+      ]
+    },
+    {
+      "exception": "Absurd fee: 5000000",
+      "wallet": 1,
+      "inputs": [],
+      "wantedFee": 5000000,
+      "outputs": []
+    }
+  ]
 }
