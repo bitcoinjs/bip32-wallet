@@ -2,7 +2,6 @@ var bip32utils = require('bip32-utils')
 var bip69 = require('bip69')
 var bitcoin = require('bitcoinjs-lib')
 var each = require('async-each')
-var coinSelect = require('coinselect')
 
 var NETWORKS = bitcoin.networks
 
@@ -20,12 +19,12 @@ function Wallet (external, internal) {
   }
 
   this.account = new bip32utils.Account(chains)
-  this.unspents = []
 }
 
-Wallet.fromJSON = function (json) {
+Wallet.fromJSON = function (json, network) {
   function toChain (cjson) {
-    var chain = new bip32utils.Chain(bitcoin.HDNode.fromBase58(cjson.node), cjson.k)
+    var node = bitcoin.HDNode.fromBase58(cjson.node, network)
+    var chain = new bip32utils.Chain(node, cjson.k)
     chain.map = cjson.map
     chain.addresses = Object.keys(chain.map).sort(function (a, b) {
       return chain.map[a] - chain.map[b]
@@ -41,10 +40,7 @@ Wallet.fromJSON = function (json) {
     chains = [toChain(json.external), toChain(json.internal)]
   }
 
-  var wallet = new Wallet(chains)
-  wallet.unspents = json.unspents
-
-  return wallet
+  return new Wallet(chains)
 }
 
 Wallet.fromSeedBuffer = function (seed, network) {
@@ -60,37 +56,44 @@ Wallet.fromSeedBuffer = function (seed, network) {
   return new Wallet(external, internal)
 }
 
-Wallet.prototype.createTransaction = function (outputs, external, internal) {
+Wallet.prototype.createTransaction = function (inputs, outputs, wantedFee, external, internal) {
   external = external || this.external
   internal = internal || this.internal
   var network = this.getNetwork()
 
-  var selection = coinSelect(this.unspents, outputs, network.feePerKb)
-  var remainder = selection.remainder
-  var fee = selection.fee
-  var inputs = selection.inputs
-
   // sanity checks
-  var totalInputValue = inputs.reduce(function (a, x) { return a + x.value }, 0)
-  var totalOutputValue = outputs.reduce(function (a, x) { return a + x.value }, 0)
-  var totalUnused = remainder + fee
+  if (wantedFee > 0.1 * 1e8) throw new Error('Absurd fee: ' + wantedFee)
 
-  if (totalInputValue - totalOutputValue !== totalUnused) throw new Error('Unexpected change/fee, please report this')
-  if (selection.fee > 0.1 * 1e8) throw new Error('Absurd fee: ' + selection.fee)
+  var actualInputValue = inputs.reduce(function (a, x) { return a + x.value }, 0)
+  var actualOutputValue = outputs.reduce(function (a, x) { return a + x.value }, 0)
+  if (actualOutputValue > actualInputValue) throw new Error('Not enough funds: ' + actualInputValue + ' < ' + actualOutputValue)
 
-  // take a copy of the outputs
-  outputs = outputs.concat()
+  var actualOutputValue2 = actualOutputValue + wantedFee
+  if (actualOutputValue2 > actualInputValue) throw new Error('Not enough funds: ' + actualInputValue + ' < ' + actualOutputValue2)
+
+  // map outputs to be BIP69 compatible
+  outputs = outputs.map(function (output) {
+    return {
+      script: bitcoin.address.toOutputScript(output.address, network),
+      value: output.value
+    }
+  })
+
+  var fee
+  var remainder = actualInputValue - actualOutputValue - wantedFee
 
   // is the remainder non-dust?
   if (remainder > network.dustThreshold) {
     outputs.push({
-      address: this.getChangeAddress(),
+      script: bitcoin.address.toOutputScript(this.getChangeAddress(), network),
       value: remainder
     })
 
-  // ignore the remainder, combine with the fee
+    fee = wantedFee
+
+  // ignore the remainder (include it in the fee)
   } else {
-    fee = fee + remainder
+    fee = wantedFee + remainder
     remainder = 0
   }
 
@@ -98,23 +101,28 @@ Wallet.prototype.createTransaction = function (outputs, external, internal) {
   inputs = bip69.sortInputs(inputs)
   outputs = bip69.sortOutputs(outputs)
 
+  // get associated private keys
+  var addresses = inputs.map(function (input) { return input.address })
+  var children = this.account.getChildren(addresses, [external, internal])
+
   // build transaction
-  var txb = new bitcoin.TransactionBuilder()
+  var txb = new bitcoin.TransactionBuilder(network)
   inputs.forEach(function (input) {
-    txb.addInput(input.txId, input.vout)
+    txb.addInput(input.txId, input.vout, input.sequence, input.prevOutScript)
   })
   outputs.forEach(function (output) {
-    txb.addOutput(output.address, output.value)
+    txb.addOutput(output.script, output.value)
   })
 
   // sign and return
-  var addresses = inputs.map(function (input) { return input.address })
-  var transaction = this.signWith(txb, addresses, external, internal).build()
+  children.forEach(function (child, i) {
+    txb.sign(i, child.keyPair)
+  })
 
   return {
     change: remainder,
     fee: fee,
-    transaction: transaction
+    transaction: txb.build()
   }
 }
 
@@ -135,11 +143,6 @@ Wallet.prototype.discover = function (gapLimit, queryCallback, done) {
   each(this.account.getChains(), discoverChain, done)
 }
 Wallet.prototype.getAllAddresses = function () { return this.account.getAllAddresses() }
-Wallet.prototype.getBalance = function () {
-  return this.unspents.reduce(function (accum, unspent) {
-    return accum + unspent.value
-  }, 0)
-}
 Wallet.prototype.getNetwork = function () { return this.account.getNetwork() }
 Wallet.prototype.getReceiveAddress = function () { return this.account.getChainAddress(0) }
 Wallet.prototype.getChangeAddress = function () { return this.account.getChainAddress(1) }
@@ -147,33 +150,6 @@ Wallet.prototype.isReceiveAddress = function (address) { return this.account.isC
 Wallet.prototype.isChangeAddress = function (address) { return this.account.isChainAddress(1, address) }
 Wallet.prototype.nextReceiveAddress = function () { return this.account.nextChainAddress(0) }
 Wallet.prototype.nextChangeAddress = function () { return this.account.nextChainAddress(1) }
-
-Wallet.prototype.getUnspentOutputs = function (unspents) { return this.unspents }
-Wallet.prototype.setUnspentOutputs = function (unspents) {
-  var seen = {}
-
-  unspents.forEach(function (unspent) {
-    var shortId = unspent.txId + ':' + unspent.vout
-    if (seen[shortId]) throw new Error('Duplicate unspent ' + shortId)
-
-    seen[shortId] = true
-  })
-
-  this.unspents = unspents
-}
-
-Wallet.prototype.signWith = function (tx, addresses, external, internal) {
-  external = external || this.external
-  internal = internal || this.internal
-
-  var children = this.account.getChildren(addresses, [external, internal])
-
-  children.forEach(function (node, i) {
-    tx.sign(i, node.privKey)
-  })
-
-  return tx
-}
 
 Wallet.prototype.toJSON = function () {
   var chains = this.account.chains.map(function (chain) {
@@ -186,8 +162,7 @@ Wallet.prototype.toJSON = function () {
 
   return {
     external: chains[0],
-    internal: chains[1],
-    unspents: this.unspents
+    internal: chains[1]
   }
 }
 

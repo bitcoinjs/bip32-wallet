@@ -65,9 +65,9 @@
       ],
       "wantedFee": 20000,
       "expected": {
-        "txId": "TODO",
         "change": 0,
-        "fee": 20000
+        "fee": 20000,
+        "txId": "b1773015d1ff341b34c7062b419c92f89bcfe11f0c91b5a7e43846b6f4be9188"
       }
     },
     {
@@ -89,9 +89,9 @@
       ],
       "wantedFee": 10000,
       "expected": {
-        "txId": "TODO",
         "change": 10000,
-        "fee": 10000
+        "fee": 10000,
+        "txId": "437800fa251311d2df2bf44400e75b00d6f26e56bf236bdcb20d804eee44470e"
       }
     },
     {
@@ -115,11 +115,11 @@
           "value": 50000
         }
       ],
-      "wantedFee": 15000,
+      "wantedFee": 19500,
       "expected": {
-        "txId": "TODO",
         "change": 0,
-        "fee": 20000
+        "fee": 20000,
+        "txId": "939a0ee9ad6ec8f176a9b999b89adb7e7f25e78738f5f92974c372b3c1ff45a2"
       }
     },
     {
@@ -145,9 +145,9 @@
       ],
       "wantedFee": 0,
       "expected": {
-        "txId": "TODO",
         "change": 20000,
-        "fee": 0
+        "fee": 0,
+        "txId": "0c1558e3491c70869388f17a6988f4b66debdc527e6cb6957ac5a0b54fbc9f80"
       }
     },
     {
@@ -173,9 +173,9 @@
       ],
       "wantedFee": 20000,
       "expected": {
-        "txId": "TODO",
         "change": 0,
-        "fee": 20000
+        "fee": 20000,
+        "txId": "939a0ee9ad6ec8f176a9b999b89adb7e7f25e78738f5f92974c372b3c1ff45a2"
       }
     },
     {
@@ -201,9 +201,43 @@
       ],
       "wantedFee": 10000,
       "expected": {
-        "txId": "TODO",
         "change": 10000,
-        "fee": 10000
+        "fee": 10000,
+        "txId": "eaf3551b9e6abb2224b39144fa287211863f69af18a3bb4dacea39d5438293a5"
+      }
+    },
+    {
+      "description": "2:2 transaction",
+      "wallet": 0,
+      "inputs": [
+        {
+          "txId": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "address": "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa",
+          "vout": 0,
+          "value": 100000
+        },
+        {
+          "txId": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "address": "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa",
+          "vout": 1,
+          "value": 100000
+        }
+      ],
+      "outputs": [
+        {
+          "address": "n2PEoV6Abxnrpzoqqq1TJT5kw8G2dMPpBd",
+          "value": 150000
+        },
+        {
+          "address": "n2PEoV6Abxnrpzoqqq1TJT5kw8G2dMPpBd",
+          "value": 40000
+        }
+      ],
+      "wantedFee": 10000,
+      "expected": {
+        "change": 0,
+        "fee": 10000,
+        "txId": "1b929faea13dd73b9c416572dfed62e41dba0913bce59811ce45120b034b63ed"
       }
     },
     {
@@ -220,38 +254,38 @@
       "outputs": [],
       "wantedFee": 10000,
       "expected": {
-        "txId": "TODO",
         "change": 110000,
-        "fee": 10000
+        "fee": 10000,
+        "txId": "96d45aa51037d9fac674916b6ac02b47e31ccf7be011c3eefad6a52eecaf08f1"
       }
     },
     {
-      "description": "2:0 transaction (sweep)",
+      "description": "2:0 transaction (sweep, no fee)",
       "wallet": 0,
       "inputs": [
         {
           "txId": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
           "address": "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa",
           "vout": 0,
-          "value": 120000
+          "value": 100000
         },
         {
           "txId": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
           "address": "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa",
           "vout": 1,
-          "value": 120000
+          "value": 100000
         }
       ],
       "outputs": [],
-      "wantedFee": 10000,
+      "wantedFee": 0,
       "expected": {
-        "txId": "TODO",
-        "change": 230000,
-        "fee": 10000
+        "change": 200000,
+        "fee": 0,
+        "txId": "8491c5f6ab0812345f19f7044c762ea45cc7b5758bed3d5fa58c0b6e1fe84dc0"
       }
     },
     {
-      "description": "standard (litecoin)",
+      "description": "1:1 transaction (litecoin)",
       "wallet": 1,
       "inputs": [
         {
@@ -267,10 +301,11 @@
           "value": 100000
         }
       ],
+      "wantedFee": 10000,
       "expected": {
-        "txId": "TODO",
         "change": 10000,
-        "fee": 10000
+        "fee": 10000,
+        "txId": "437800fa251311d2df2bf44400e75b00d6f26e56bf236bdcb20d804eee44470e"
       }
     },
     {
@@ -305,10 +340,10 @@
       ]
     },
     {
-      "exception": "Absurd fee: 5000000",
+      "exception": "Absurd fee: 50000000",
       "wallet": 1,
       "inputs": [],
-      "wantedFee": 5000000,
+      "wantedFee": 50000000,
       "outputs": []
     }
   ]

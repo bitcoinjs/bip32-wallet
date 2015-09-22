@@ -1,13 +1,14 @@
 /* global beforeEach, describe, it */
 
 var assert = require('assert')
-var bip69 = require('bip69')
 var bip32utils = require('bip32-utils')
 var bitcoin = require('bitcoinjs-lib')
 var sinon = require('sinon')
 
 var Wallet = require('../')
 var fixtures = require('./fixtures')
+
+var NETWORKS = bitcoin.networks
 
 describe('Wallet', function () {
   var seed, wallet
@@ -19,13 +20,13 @@ describe('Wallet', function () {
 
   describe('fromSeedBuffer', function () {
     it('defaults to Bitcoin network', function () {
-      assert.equal(wallet.getNetwork(), bitcoin.networks.bitcoin)
+      assert.equal(wallet.getNetwork(), NETWORKS.bitcoin)
     })
 
     it('uses the network if specified', function () {
-      wallet = Wallet.fromSeedBuffer(seed, bitcoin.networks.testnet)
+      wallet = Wallet.fromSeedBuffer(seed, NETWORKS.testnet)
 
-      assert.equal(wallet.getNetwork(), bitcoin.networks.testnet)
+      assert.equal(wallet.getNetwork(), NETWORKS.testnet)
     })
 
     it("generates m/0'/0 as the external chain node", function () {
@@ -92,7 +93,8 @@ describe('Wallet', function () {
     wrapsBIP32('containsAddress', '', ['X'], ['X'])
 
     fixtures.wallets.forEach(function (f) {
-      var wallet = Wallet.fromJSON(f.json)
+      var network = NETWORKS[f.network]
+      var wallet = Wallet.fromJSON(f.json, network)
 
       it('returns the expected results', function () {
         Object.keys(f.json.external.map).forEach(function (address) {
@@ -112,7 +114,8 @@ describe('Wallet', function () {
     wrapsBIP32('getAllAddresses')
 
     fixtures.wallets.forEach(function (f) {
-      var wallet = Wallet.fromJSON(f.json)
+      var network = NETWORKS[f.network]
+      var wallet = Wallet.fromJSON(f.json, network)
 
       it('returns all known addresses', function () {
         var fAllAddresses = Object.keys(f.json.external.map).concat(Object.keys(f.json.internal.map))
@@ -191,7 +194,8 @@ describe('Wallet', function () {
 
   describe('fromJSON/toJSON', function () {
     fixtures.wallets.forEach(function (f) {
-      var wallet = Wallet.fromJSON(f.json)
+      var network = NETWORKS[f.network]
+      var wallet = Wallet.fromJSON(f.json, network)
 
       it('imports ' + f.seed.slice(0, 20) + '... from JSON', function () {
         Object.keys(f.json.external.map).forEach(function (address) {
@@ -218,8 +222,10 @@ describe('Wallet', function () {
       var wallet
 
       beforeEach(function () {
-        var walletJson = fixtures.wallets[f.wallet].json
-        wallet = Wallet.fromJSON(walletJson)
+        var fwallet = fixtures.wallets[f.wallet]
+        var network = NETWORKS[fwallet.network]
+
+        wallet = Wallet.fromJSON(fwallet.json, network)
       })
 
       if (f.exception) {
@@ -232,9 +238,10 @@ describe('Wallet', function () {
         it('creates ' + f.description + ' (' + f.expected.txId.slice(0, 20) + '... )', function () {
           var result = wallet.createTransaction(f.inputs, f.outputs, f.wantedFee)
 
-          assert.equal(result.change, f.expected.change)
-          assert.equal(result.fee, f.expected.fee)
-          assert.equal(result.transaction.getId(), f.expected.txId)
+          result.txId = result.transaction.getId()
+          delete result.transaction
+
+          assert.deepEqual(result, f.expected)
         })
       }
     })
