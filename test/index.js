@@ -237,11 +237,36 @@ describe('Wallet', function () {
       } else {
         it('creates ' + f.description + ' (' + f.expected.txId.slice(0, 20) + '... )', function () {
           var result = wallet.createTransaction(f.inputs, f.outputs, f.wantedFee)
+          var transaction = result.transaction
 
           result.txId = result.transaction.getId()
           delete result.transaction
 
           assert.deepEqual(result, f.expected)
+
+          assert.equal(transaction.ins.length, f.inputs.length)
+          f.inputs.forEach(function (input) {
+            assert(transaction.ins.some(function (tinput) {
+              return input.txId === bitcoin.bufferutils.reverse(tinput.hash).toString('hex') && input.vout === tinput.index
+            }))
+          })
+
+          assert.equal(transaction.outs.length, f.outputs.length + (f.expected.change > 0))
+          f.outputs.forEach(function (output) {
+            var outputScript = bitcoin.address.toOutputScript(output.address, wallet.getNetwork())
+
+            assert(transaction.outs.some(function (toutput) {
+              return outputScript.equals(toutput.script) && output.value === toutput.value
+            }))
+          })
+
+          if (f.expected.change) {
+            var changeScript = bitcoin.address.toOutputScript(wallet.getChangeAddress(), wallet.getNetwork())
+
+            assert(transaction.outs.some(function (toutput) {
+              return changeScript.equals(toutput.script) && f.expected.change === toutput.value
+            }))
+          }
         })
       }
     })
