@@ -74,7 +74,7 @@ Wallet.prototype.createTransaction = function (inputs, outputs, wantedFee, exter
   // map outputs to be BIP69 compatible
   outputs = outputs.map(function (output) {
     return {
-      script: bitcoin.address.toOutputScript(output.address, network),
+      script: output.script || bitcoin.address.toOutputScript(output.address, network),
       value: output.value
     }
   })
