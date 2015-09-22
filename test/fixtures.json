@@ -241,7 +241,7 @@
       }
     },
     {
-      "description": "1:0 transaction (sweep)",
+      "description": "1:0 transaction (self-sweep)",
       "wallet": 0,
       "inputs": [
         {
@@ -260,7 +260,7 @@
       }
     },
     {
-      "description": "2:0 transaction (sweep, no fee)",
+      "description": "2:0 transaction (self-sweep, no fee)",
       "wallet": 0,
       "inputs": [
         {
