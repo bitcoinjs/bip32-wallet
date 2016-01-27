@@ -56,7 +56,7 @@ Wallet.fromSeedBuffer = function (seed, network) {
   return new Wallet(external, internal)
 }
 
-Wallet.prototype.createTransaction = function (inputs, outputs, wantedFee, external, internal) {
+Wallet.prototype.createTransaction = function (inputs, outputs, wantedFee, external, internal, nLockTime) {
   external = external || this.external
   internal = internal || this.internal
   var network = this.getNetwork()
@@ -107,6 +107,14 @@ Wallet.prototype.createTransaction = function (inputs, outputs, wantedFee, exter
 
   // build transaction
   var txb = new bitcoin.TransactionBuilder(network)
+
+  // TODO: use txb.setLockTime when merged
+  // ref https://github.com/bitcoinjs/bitcoinjs-lib/pull/507
+  if (nLockTime !== undefined) {
+    txb.tx.locktime = nLockTime
+//     txb.setLockTime(nLockTime)
+  }
+
   inputs.forEach(function (input) {
     txb.addInput(input.txId, input.vout, input.sequence, input.prevOutScript)
   })

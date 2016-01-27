@@ -151,6 +151,31 @@
       }
     },
     {
+      "description": "1:1 transaction (with locktime)",
+      "wallet": 0,
+      "locktime": 65535,
+      "inputs": [
+        {
+          "txId": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "address": "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa",
+          "vout": 0,
+          "value": 120000
+        }
+      ],
+      "outputs": [
+        {
+          "address": "n2PEoV6Abxnrpzoqqq1TJT5kw8G2dMPpBd",
+          "value": 100000
+        }
+      ],
+      "wantedFee": 20000,
+      "expected": {
+        "change": 0,
+        "fee": 20000,
+        "txId": "e52f646e27f3042626fc8f8863977ea0988c31656103f0c185691fbeb86184e9"
+      }
+    },
+    {
       "description": "1:2 transaction",
       "wallet": 0,
       "inputs": [

@@ -236,7 +236,7 @@ describe('Wallet', function () {
         })
       } else {
         it('creates ' + f.description + ' (' + f.expected.txId.slice(0, 20) + '... )', function () {
-          var result = wallet.createTransaction(f.inputs, f.outputs, f.wantedFee)
+          var result = wallet.createTransaction(f.inputs, f.outputs, f.wantedFee, null, null, f.locktime)
           var transaction = result.transaction
 
           result.txId = result.transaction.getId()
