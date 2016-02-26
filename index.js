@@ -108,11 +108,8 @@ Wallet.prototype.createTransaction = function (inputs, outputs, wantedFee, exter
   // build transaction
   var txb = new bitcoin.TransactionBuilder(network)
 
-  // TODO: use txb.setLockTime when merged
-  // ref https://github.com/bitcoinjs/bitcoinjs-lib/pull/507
   if (nLockTime !== undefined) {
-    txb.tx.locktime = nLockTime
-//     txb.setLockTime(nLockTime)
+    txb.setLockTime(nLockTime)
   }
 
   inputs.forEach(function (input) {
