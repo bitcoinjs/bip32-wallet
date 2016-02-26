@@ -1,7 +1,7 @@
+var async = require('async')
 var bip32utils = require('bip32-utils')
 var bip69 = require('bip69')
 var bitcoin = require('bitcoinjs-lib')
-var each = require('async-each')
 
 var NETWORKS = bitcoin.networks
 
@@ -141,11 +141,11 @@ Wallet.prototype.discover = function (gapLimit, queryCallback, done) {
       var unused = checked - used
       for (var i = 1; i < unused; ++i) chain.pop()
 
-      return callback()
+      callback()
     })
   }
 
-  each(this.account.getChains(), discoverChain, done)
+  async.each(this.account.getChains(), discoverChain, done)
 }
 Wallet.prototype.getAllAddresses = function () { return this.account.getAllAddresses() }
 Wallet.prototype.getNetwork = function () { return this.account.getNetwork() }
