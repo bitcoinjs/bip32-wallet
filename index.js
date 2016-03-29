@@ -55,7 +55,9 @@ Wallet.fromSeedBuffer = function (seed, network) {
 
   return new Wallet(external, internal)
 }
-
+Wallet.prototype.fromSeedHex = function (hex, network) {
+  return Wallet.fromSeedBuffer(new Buffer(hex, 'hex'), network);
+}
 Wallet.prototype.createTransaction = function (inputs, outputs, wantedFee, external, internal, nLockTime) {
   external = external || this.external
   internal = internal || this.internal
