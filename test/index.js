@@ -40,6 +40,21 @@ describe('Wallet', function () {
     })
   })
 
+  describe('fromSeedHex', function () {
+    var seedHex
+
+    beforeEach(function () {
+      seedHex = seed.toString('hex')
+    })
+
+    it('wraps BIP32Wallet.fromSeedBuffer', sinon.test(function () {
+      var mock = this.mock(Wallet)
+      mock.expects('fromSeedBuffer').once().withArgs(seed, null)
+
+      Wallet.fromSeedHex(seedHex, null)
+    }))
+  })
+
   describe('discover', function () {
     it('wraps bip32utils.discovery', sinon.test(function () {
       var gapLimit = 2
