@@ -63,9 +63,8 @@
           "value": 100000
         }
       ],
-      "wantedFee": 20000,
+      "feeMax": 20000,
       "expected": {
-        "change": 0,
         "fee": 20000,
         "txId": "b1773015d1ff341b34c7062b419c92f89bcfe11f0c91b5a7e43846b6f4be9188"
       }
@@ -85,11 +84,13 @@
         {
           "address": "n2PEoV6Abxnrpzoqqq1TJT5kw8G2dMPpBd",
           "value": 100000
+        },
+        {
+          "value": 10000
         }
       ],
-      "wantedFee": 10000,
+      "feeMax": 10000,
       "expected": {
-        "change": 10000,
         "fee": 10000,
         "txId": "437800fa251311d2df2bf44400e75b00d6f26e56bf236bdcb20d804eee44470e"
       }
@@ -115,9 +116,8 @@
           "value": 50000
         }
       ],
-      "wantedFee": 19500,
+      "feeMax": 20000,
       "expected": {
-        "change": 0,
         "fee": 20000,
         "txId": "939a0ee9ad6ec8f176a9b999b89adb7e7f25e78738f5f92974c372b3c1ff45a2"
       }
@@ -141,11 +141,13 @@
         {
           "address": "n2PEoV6Abxnrpzoqqq1TJT5kw8G2dMPpBd",
           "value": 50000
+        },
+        {
+          "value": 20000
         }
       ],
-      "wantedFee": 0,
+      "feeMax": 0,
       "expected": {
-        "change": 20000,
         "fee": 0,
         "txId": "0c1558e3491c70869388f17a6988f4b66debdc527e6cb6957ac5a0b54fbc9f80"
       }
@@ -168,9 +170,8 @@
           "value": 100000
         }
       ],
-      "wantedFee": 20000,
+      "feeMax": 20000,
       "expected": {
-        "change": 0,
         "fee": 20000,
         "txId": "e52f646e27f3042626fc8f8863977ea0988c31656103f0c185691fbeb86184e9"
       }
@@ -196,9 +197,8 @@
           "value": 50000
         }
       ],
-      "wantedFee": 20000,
+      "feeMax": 20000,
       "expected": {
-        "change": 0,
         "fee": 20000,
         "txId": "939a0ee9ad6ec8f176a9b999b89adb7e7f25e78738f5f92974c372b3c1ff45a2"
       }
@@ -222,11 +222,13 @@
         {
           "address": "n2PEoV6Abxnrpzoqqq1TJT5kw8G2dMPpBd",
           "value": 50000
+        },
+        {
+          "value": 10000
         }
       ],
-      "wantedFee": 10000,
+      "feeMax": 10000,
       "expected": {
-        "change": 10000,
         "fee": 10000,
         "txId": "eaf3551b9e6abb2224b39144fa287211863f69af18a3bb4dacea39d5438293a5"
       }
@@ -258,15 +260,14 @@
           "value": 40000
         }
       ],
-      "wantedFee": 10000,
+      "feeMax": 10000,
       "expected": {
-        "change": 0,
         "fee": 10000,
         "txId": "1b929faea13dd73b9c416572dfed62e41dba0913bce59811ce45120b034b63ed"
       }
     },
     {
-      "description": "1:0 transaction (self-sweep)",
+      "description": "1:1 transaction (self-sweep)",
       "wallet": 0,
       "inputs": [
         {
@@ -276,16 +277,19 @@
           "value": 120000
         }
       ],
-      "outputs": [],
-      "wantedFee": 10000,
+      "outputs": [
+        {
+          "value": 110000
+        }
+      ],
+      "feeMax": 10000,
       "expected": {
-        "change": 110000,
         "fee": 10000,
         "txId": "96d45aa51037d9fac674916b6ac02b47e31ccf7be011c3eefad6a52eecaf08f1"
       }
     },
     {
-      "description": "2:0 transaction (self-sweep, no fee)",
+      "description": "2:1 transaction (self-sweep, no fee)",
       "wallet": 0,
       "inputs": [
         {
@@ -301,10 +305,13 @@
           "value": 100000
         }
       ],
-      "outputs": [],
-      "wantedFee": 0,
+      "outputs": [
+        {
+          "value": 200000
+        }
+      ],
+      "feeMax": 0,
       "expected": {
-        "change": 200000,
         "fee": 0,
         "txId": "8491c5f6ab0812345f19f7044c762ea45cc7b5758bed3d5fa58c0b6e1fe84dc0"
       }
@@ -324,11 +331,13 @@
         {
           "address": "Lg6EmeK1sbbfJh2PJQ2NkYwCHM2buUDWjT",
           "value": 100000
+        },
+        {
+          "value": 10000
         }
       ],
-      "wantedFee": 10000,
+      "feeMax": 10000,
       "expected": {
-        "change": 10000,
         "fee": 10000,
         "txId": "437800fa251311d2df2bf44400e75b00d6f26e56bf236bdcb20d804eee44470e"
       }
@@ -337,7 +346,7 @@
       "exception": "Not enough funds: 0 < 10000",
       "wallet": 1,
       "inputs": [],
-      "wantedFee": 0,
+      "feeMax": 0,
       "outputs": [
         {
           "address": "Lg6EmeK1sbbfJh2PJQ2NkYwCHM2buUDWjT",
@@ -346,29 +355,10 @@
       ]
     },
     {
-      "exception": "Not enough funds: 10000 < 15000",
-      "wallet": 0,
-      "inputs": [
-        {
-          "txId": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
-          "address": "n1GyUANZand9Kw6hGSV9837cCC9FFUQzQa",
-          "vout": 0,
-          "value": 10000
-        }
-      ],
-      "wantedFee": 5000,
-      "outputs": [
-        {
-          "address": "n2PEoV6Abxnrpzoqqq1TJT5kw8G2dMPpBd",
-          "value": 10000
-        }
-      ]
-    },
-    {
-      "exception": "Absurd fee: 50000000",
+      "exception": "Maximum fee is absurd: 50000000",
       "wallet": 1,
       "inputs": [],
-      "wantedFee": 50000000,
+      "feeMax": 50000000,
       "outputs": []
     }
   ]

@@ -232,7 +232,7 @@ describe('Wallet', function () {
     })
   })
 
-  describe('createTransaction', function () {
+  describe('buildTransaction', function () {
     fixtures.transactions.forEach(function (f) {
       var wallet
 
@@ -246,19 +246,19 @@ describe('Wallet', function () {
       if (f.exception) {
         it('throws ' + f.exception, function () {
           assert.throws(function () {
-            wallet.createTransaction(f.inputs, f.outputs, f.wantedFee)
+            wallet.buildTransaction(f.inputs, f.outputs, f.feeMax)
           }, new RegExp(f.exception))
         })
       } else {
-        it('creates ' + f.description + ' (' + f.expected.txId.slice(0, 20) + '... )', function () {
-          var result = wallet.createTransaction(f.inputs, f.outputs, f.wantedFee, null, null, f.locktime)
+        it('builds ' + f.description + ' (' + f.expected.txId.slice(0, 20) + '... )', function () {
+          var result = wallet.buildTransaction(f.inputs, f.outputs, f.feeMax, null, null, f.locktime)
+          var txId = result.transaction.getId()
+
+          // checks
+          assert.equal(txId, f.expected.txId)
+          assert.equal(result.fee, f.expected.fee)
+
           var transaction = result.transaction
-
-          result.txId = result.transaction.getId()
-          delete result.transaction
-
-          assert.deepEqual(result, f.expected)
-
           assert.equal(transaction.ins.length, f.inputs.length)
           f.inputs.forEach(function (input) {
             assert(transaction.ins.some(function (tinput) {
@@ -266,22 +266,32 @@ describe('Wallet', function () {
             }))
           })
 
-          assert.equal(transaction.outs.length, f.outputs.length + (f.expected.change > 0))
+          assert.equal(transaction.outs.length, f.outputs.length)
           f.outputs.forEach(function (output) {
+            // skip change addresses (see next loop)
+            if (!output.address) return
+
+            // otherwise, assert they are the expected scripts
             var outputScript = bitcoin.address.toOutputScript(output.address, wallet.getNetwork())
 
-            assert(transaction.outs.some(function (toutput) {
-              return outputScript.equals(toutput.script) && output.value === toutput.value
+            // assert address exists
+            assert(transaction.outs.some(function (output2) {
+              return outputScript.equals(output2.script) && output.value === output2.value
             }))
           })
 
-          if (f.expected.change) {
-            var changeScript = bitcoin.address.toOutputScript(wallet.getChangeAddress(), wallet.getNetwork())
+          // now lets do some sanity checking for the change outputs
+          transaction.outs.forEach(function (output) {
+            // enforce change addresses are ACTUAL change addresses
+            var address = bitcoin.address.fromOutputScript(output.script, wallet.getNetwork())
 
-            assert(transaction.outs.some(function (toutput) {
-              return changeScript.equals(toutput.script) && f.expected.change === toutput.value
-            }))
-          }
+            if (wallet.containsAddress(address)) {
+              // ensure the value exists as a change output
+              assert(f.outputs.some(function (output2) {
+                return output2.address === undefined && output.value === output2.value
+              }))
+            }
+          })
         })
       }
     })
