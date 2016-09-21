@@ -60,49 +60,46 @@ Wallet.fromSeedHex = function (hex, network) {
   return Wallet.fromSeedBuffer(new Buffer(hex, 'hex'), network)
 }
 
-Wallet.prototype.createTransaction = function (inputs, outputs, wantedFee, external, internal, nLockTime) {
+Wallet.prototype.buildTransaction = function (inputs, outputs, feeMax, external, internal, nLockTime) {
+  if (!isFinite(feeMax)) throw new TypeError('Expected finite maximum fee')
+  if (feeMax > 0.2 * 1e8) throw new Error('Maximum fee is absurd: ' + feeMax)
+
   external = external || this.external
   internal = internal || this.internal
   var network = this.getNetwork()
 
   // sanity checks
-  if (wantedFee > 0.1 * 1e8) throw new Error('Absurd fee: ' + wantedFee)
+  var inputValue = inputs.reduce(function (a, x) { return a + x.value }, 0)
+  var outputValue = outputs.reduce(function (a, x) { return a + x.value }, 0)
+  if (outputValue > inputValue) throw new Error('Not enough funds: ' + inputValue + ' < ' + outputValue)
 
-  var actualInputValue = inputs.reduce(function (a, x) { return a + x.value }, 0)
-  var actualOutputValue = outputs.reduce(function (a, x) { return a + x.value }, 0)
-  if (actualOutputValue > actualInputValue) throw new Error('Not enough funds: ' + actualInputValue + ' < ' + actualOutputValue)
-
-  var actualOutputValue2 = actualOutputValue + wantedFee
-  if (actualOutputValue2 > actualInputValue) throw new Error('Not enough funds: ' + actualInputValue + ' < ' + actualOutputValue2)
+  // clone the internal chain to avoid inadvertently moving the wallet forward before usage
+  var chain = this.account.getChain(1).clone()
 
   // map outputs to be BIP69 compatible
+  // add missing change outputs
   outputs = outputs.map(function (output) {
+    var script = output.script
+    if (!script && output.address) {
+      script = bitcoin.address.toOutputScript(output.address, network)
+    }
+
+    if (!script) {
+      script = bitcoin.address.toOutputScript(chain.get(), network)
+      chain.next()
+    }
+
     return {
-      script: output.script || bitcoin.address.toOutputScript(output.address, network),
+      script: script,
       value: output.value
     }
   })
 
-  var fee
-  var remainder = actualInputValue - actualOutputValue - wantedFee
-
-  // is the remainder non-dust?
-  if (remainder > network.dustThreshold) {
-    outputs.push({
-      script: bitcoin.address.toOutputScript(this.getChangeAddress(), network),
-      value: remainder
-    })
-
-    fee = wantedFee
-
-  // ignore the remainder (include it in the fee)
-  } else {
-    fee = wantedFee + remainder
-    remainder = 0
-  }
+  var fee = inputValue - outputValue
+  if (fee > feeMax) throw new Error('Fee is too high: ' + feeMax)
 
   // apply BIP69 for improved privacy
-  inputs = bip69.sortInputs(inputs)
+  inputs = bip69.sortInputs(inputs.concat())
   outputs = bip69.sortOutputs(outputs)
 
   // get associated private keys
@@ -119,6 +116,7 @@ Wallet.prototype.createTransaction = function (inputs, outputs, wantedFee, exter
   inputs.forEach(function (input) {
     txb.addInput(input.txId, input.vout, input.sequence, input.prevOutScript)
   })
+
   outputs.forEach(function (output) {
     txb.addOutput(output.script, output.value)
   })
@@ -129,7 +127,6 @@ Wallet.prototype.createTransaction = function (inputs, outputs, wantedFee, exter
   })
 
   return {
-    change: remainder,
     fee: fee,
     transaction: txb.build()
   }

@@ -1,3 +1,16 @@
+# 0.7.0
+* adds `buildTransaction`, WARNING: different API, maxFee is the maximum fee for transaction sanitization
+* removes `createTransaction`
+* bumps `async` to `2.0.0`
+* bumps `bitcoinjs` to `^2.3.0`
+
+# 0.6.1
+* bumps `async` to `1.5.0`
+* bumps `bitcoinjs` to `^2.2.0`
+
+# 0.6.0
+* adds optional `nLockTime` parameter to `createTransaction`
+
 # 0.5.0
 Warning, `createTransaction` may be removed in a future version, with this package being merged with `bip32-utils` to form purely BIP32 key management.
 

@@ -20,14 +20,16 @@
   },
   "homepage": "https://github.com/bitcoinjs/bip32-wallet",
   "dependencies": {
-    "async": "^1.5.2",
-    "bip32-utils": "^0.7.2",
-    "bip69": "^1.0.3",
-    "bitcoinjs-lib": "^2.2.0"
+    "async": "^2.0.1",
+    "bip32-utils": "^0.7.4",
+    "bip69": "^1.0.3"
   },
   "devDependencies": {
     "mocha": "*",
     "sinon": "^1.12.0",
     "standard": "*"
+  },
+  "peerDependencies": {
+    "bitcoinjs-lib": "^2.3.0"
   }
 }
