@@ -7,6 +7,8 @@
 
 A BIP32 Wallet backed by bitcoinjs-lib, lite on features but heavily tested.
 
+# DEPRECATED - Use [BIP32-utils](https://github.com/bitcoinjs/bip32-utils) instead
+
 ## Derivation
 
 Derivation path of `m/0'/i/k`,  where `i` is the account (external or internal) and `k` is the leaf node (for addresses).
